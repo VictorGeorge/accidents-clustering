@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "properties":{
+        "fields":{
+           "5065":{
+              "lookup":{
+                 "1":"Pedestrian",
+                 "3":"Motorcycle",
+                 "2":"Bicycle",
+                 "4":"Car"
+              },
+              "name":"Accident type"
+           },
+           "f2":{
+              "name":"Date"
+           },
+           "f3":{
+              "lookup":{
+                "1":"Com Vítimas Fatais",
+                "3":"Com Vítimas Feridas",
+                "5":"Sem Vítimas",
+                "6":"Ignorado"
+              },
+              "name":"Injuries"
+           }
+        },
+        "description":"Acidentes nas Rodovias Brasileiras"
+     }
+}
