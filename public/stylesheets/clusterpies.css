@@ -1,6 +1,8 @@
 #map {
   width:960px;
   height:500px;
+  float: left;
+  margin-left: 25%;
 }
 #legend {
   position: absolute;
@@ -14,6 +16,9 @@
   font-family: sans-serif;
   width: 165px;
   background: rgba(255,255,255,0.6);
+  float: left;
+  margin-left: 25%;
+  margin-top: 220px;
 }
 .legendheading {
   position: relative;
@@ -129,4 +134,9 @@
 }
 .map-popup span.label {
   font-weight: bold;
+}
+
+#chart {
+    width:600px;
+    height:200px;
 }

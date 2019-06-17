@@ -7,6 +7,7 @@ link(rel='stylesheet', href='/stylesheets/clusterpies.css')
 script(src='http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js', charset='utf-8')
 script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js')
 script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 #container
     form(action='/filter')
         select(name='weekDay')
@@ -19,10 +20,88 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='Sábado') Sábado
             option(value='Domingo') Domingo
         input(type='submit', value='Submit')
+    #chart
+        canvas(id="bar-chart")
+        script.
+            var myData = !{JSON.stringify(jsonData)};
+            var myDataFeatures = myData.features;
+            var segunda = 0;
+            var terca = 0;
+            var quarta = 0;
+            var quinta = 0;
+            var sexta = 0;
+            var sabado = 0;
+            var domingo = 0;
+            //myData.forEach(function(obj) { console.log(myData.feature); });
+            for(var i = 0; i < myDataFeatures.length; i++) {
+                var obj = myDataFeatures[i];
+
+                switch(obj.properties.f4) {
+                    case "Segunda": {
+                        segunda++;
+                        break;
+                    }
+                    case "Terça": {
+                        terca++;
+                        break;
+                    }
+                    case "Quarta": {
+                        quarta++;
+                        break;
+                    }
+                    case "Quinta": {
+                        quinta++;
+                        break;
+                    }
+                    case "Sexta": {
+                        sexta++;
+                        break;
+                    }
+                    case "Sábado": {
+                        sabado++;
+                        break;
+                    }
+                    case "Domingo": {
+                        domingo++;
+                        break;
+                    }
+                }
+            }
+            console.log(segunda);
+            new Chart(document.getElementById("bar-chart"), {
+                type: 'bar',
+                data: {
+                labels: ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"],
+                datasets: [
+                    {
+                    label: "Quantidade de acidentes",
+                    backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850", "yellow", "orange"],
+                    data: [segunda,terca,quarta,quinta,sexta, sabado, domingo]
+                    }
+                ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Número de acidentes por dia da semana'
+                    },
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+            });
     #map
     script.
-        "use strict"
         var myData = !{JSON.stringify(jsonData)};
+        "use strict"
+        console.log(myData);
         var geojson,
             metadata,
             geojsonPath = 'exemploFiltro.geojson',
@@ -82,6 +161,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             });
             return L.marker(latlng, {icon: myIcon});
         }
+
         function defineFeaturePopup(feature, layer) {
             var props = feature.properties,
                 fields = metadata.fields,
@@ -99,6 +179,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             popupContent = '<div class="map-popup">'+popupContent+'</div>';
             layer.bindPopup(popupContent,{offset: L.point(1,-2)});
         }
+
         function defineClusterIcon(cluster) {
             var children = cluster.getAllChildMarkers(),
                 n = children.length, //Get number of markers in cluster
