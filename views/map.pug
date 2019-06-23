@@ -9,8 +9,8 @@ script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.
 script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 #container
-    form(action='/filter')
-        select(name='weekDay')
+    form(name='weekDayForm' action='/filter')
+        select(name='weekDay' id='weekDay' hidden)
             option(disabled='', selected='', value='') Dia da semana
             option(value='Segunda') Segunda
             option(value='Terça') Terça
@@ -19,7 +19,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='Sexta') Sexta
             option(value='Sábado') Sábado
             option(value='Domingo') Domingo
-        input(type='submit', value='Submit')
+        input(type='hidden', value='Submit')
     #chart
         canvas(id="bar-chart")
         script.
@@ -68,10 +68,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 }
             }
             console.log(segunda);
-            new Chart(document.getElementById("bar-chart"), {
+            var bar_chart = new Chart(document.getElementById("bar-chart"), {
                 type: 'bar',
                 data: {
-                labels: ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"],
+                labels: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"],
                 datasets: [
                     {
                     label: "Quantidade de acidentes",
@@ -87,6 +87,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         text: 'Número de acidentes por dia da semana'
                     },
                     maintainAspectRatio: false,
+                    onClick: chartClickEvent,
                     responsive: true,
                     scales: {
                         yAxes: [{
@@ -97,6 +98,13 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                 }
             });
+
+            function chartClickEvent(event, array){
+                var choosen = array[0]._view.label; //we have the name of bar clicked, use to filter
+                var element = document.getElementById("weekDay");
+                element.value = choosen;
+                document.weekDayForm.submit();
+            }
     #map
     script.
         var myData = !{JSON.stringify(jsonData)};
@@ -114,14 +122,19 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             rmax = 30, //Maximum radius for cluster pies
             markerclusters = L.markerClusterGroup({
                 maxClusterRadius: 2*rmax,
+                chunkedLoading: true,
+                chunkInterval: 200, // process markers for a maximum of ~ n milliseconds (then trigger the chunkProgress callback)
+                chunkDelay: 50, // at the end of each interval, give n milliseconds back to system/browser
+                chunkProgress: null, // progress callback: function(processed, total, elapsed) (e.g. for a progress indicator)'
                 iconCreateFunction: defineClusterIcon //this is where the magic happens
+                // When bulk adding layers, adds markers in chunks. Means addLayers may not add all the layers in the call, others will be loaded during setTimeouts
             }),
             map = L.map('map').setView([59.95, 10.78], 8);
         //Add basemap
         L.tileLayer(tileServer, {attribution: tileAttribution,  maxZoom: 15}).addTo(map);
         //and the empty markercluster layer
         map.addLayer(markerclusters);
-        
+
         //Ready to go, load the properties of geojson
         d3.json(propertiesPath, function(error, data) {
             if (!error) {
