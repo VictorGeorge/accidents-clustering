@@ -20,7 +20,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='Sábado') Sábado
             option(value='Domingo') Domingo
         input(type='hidden', value='Submit')
-    #chart
+    #chart1
         canvas(id="bar-chart")
         script.
             var myData = !{JSON.stringify(jsonData)};
@@ -32,7 +32,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             var sexta = 0;
             var sabado = 0;
             var domingo = 0;
-            //myData.forEach(function(obj) { console.log(myData.feature); });
             for(var i = 0; i < myDataFeatures.length; i++) {
                 var obj = myDataFeatures[i];
 
@@ -67,7 +66,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                 }
             }
-            console.log(segunda);
             var bar_chart = new Chart(document.getElementById("bar-chart"), {
                 type: 'bar',
                 data: {
@@ -85,6 +83,59 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     title: {
                         display: true,
                         text: 'Número de acidentes por dia da semana'
+                    },
+                    maintainAspectRatio: false,
+                    onClick: chartClickEvent,
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+            });
+            function chartClickEvent(event, array){
+                var choosen = array[0]._view.label; //we have the name of bar clicked, use to filter
+                var element = document.getElementById("weekDay");
+                element.value = choosen;
+                document.weekDayForm.submit();
+            }
+    #chart2
+        canvas(id="mixed-chart")
+        script.
+            var myData = !{JSON.stringify(jsonData)};
+            var myDataFeatures = myData.features;
+            const yearDataGoes = 2018;
+            const yearStarted = 2007;
+            var accidentsPerYear = new Array(yearDataGoes - yearStarted).fill(0);
+            var years = ['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018']
+            for(var i = 0; i < myDataFeatures.length; i++) {
+                var obj = myDataFeatures[i];
+                accidentsPerYear[yearDataGoes - obj.properties.f5]++;
+            }
+            console.log(accidentsPerYear);
+            var line_chart = new Chart(document.getElementById("mixed-chart"), {
+                type: 'line',
+                data: {
+                labels: years,
+                datasets: [
+                    {
+                    label: "Quantidade de acidentes",
+                    //backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850", "yellow", "orange", "green", "blue", "grey", "gold", "brown"],
+                    borderColor: "#3e95cd",
+                    fill:false,
+                    data: [accidentsPerYear[11], accidentsPerYear[10], accidentsPerYear[9], accidentsPerYear[8], accidentsPerYear[7], accidentsPerYear[6],
+                    accidentsPerYear[5], accidentsPerYear[4], accidentsPerYear[3], accidentsPerYear[2], accidentsPerYear[1], accidentsPerYear[0]]
+                    }
+                ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Acidentes por ano'
                     },
                     maintainAspectRatio: false,
                     onClick: chartClickEvent,

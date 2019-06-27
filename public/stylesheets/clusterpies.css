@@ -18,7 +18,7 @@
   background: rgba(255,255,255,0.6);
   float: left;
   margin-left: 25%;
-  margin-top: 220px;
+  margin-top: 420px;
 }
 .legendheading {
   position: relative;
@@ -136,7 +136,12 @@
   font-weight: bold;
 }
 
-#chart {
+#chart1 {
     width:600px;
     height:200px;
+}
+
+#chart2 {
+  width:600px;
+  height:200px;
 }
