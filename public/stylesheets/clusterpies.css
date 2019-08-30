@@ -1,13 +1,12 @@
 #map {
-  width:960px;
-  height:500px;
-  float: left;
-  margin-left: 25%;
+  width:60%;
+  height:1000px;
+  float: right;
 }
 #legend {
   position: absolute;
   top: 3px;
-  left: 780px;
+  left: 1600px;
   margin: 10px;
   padding: 5px;
   border-radius: 5px;
@@ -16,9 +15,9 @@
   font-family: sans-serif;
   width: 165px;
   background: rgba(255,255,255,0.6);
-  float: left;
+  float: right;
   margin-left: 25%;
-  margin-top: 420px;
+  margin-top: 220px;
 }
 .legendheading {
   position: relative;
@@ -136,12 +135,23 @@
   font-weight: bold;
 }
 
-#chart1 {
-    width:600px;
+#chartWeekDay {
+    float: left;
+    width:40%;
     height:200px;
+    left: 50%;
+}
+
+#chartYears {
+  float: left;
+  width:40%;
+  height:200px;
+  left: 50%;
 }
 
 #chart2 {
-  width:600px;
+  float: left;
+  width:40%;
   height:200px;
+  left: 50%;
 }

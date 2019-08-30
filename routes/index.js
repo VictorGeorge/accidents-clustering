@@ -56,30 +56,57 @@ router.get('/map', function(req, res) {
     });
 });
 
+//TODO: Refactor so it doesnt repeat code and prepare for multifilter
 /* GET the filtered page */
 router.get('/filter*', function (req, res) {
     var weekDay = req.query.weekDay;
-    if (weekDay.indexOf("--") > -1 || weekDay.indexOf("'") > -1 || weekDay.indexOf(";") > -1 || weekDay.indexOf("/*") > -1 || weekDay.indexOf("xp_") > -1){
-        console.log("Bad request detected");
-        res.redirect('/map');
-        return;
-    } else {
-        console.log("Request passed")
-        var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.dia_semana = \'" + weekDay + "\' LIMIT " + queryLimit + ") As f) As fc";
-        var client = new Client(conString);
-        client.connect();
-        var query = client.query(new Query(filter_query)); // Run our Query
-        query.on("row", function (row, result) {
-            result.addRow(row);
-        });
-        query.on("end", function (result) {
-            var data = result.rows[0].row_to_json
-            res.render('map', {
-                title: "Express API",
-                jsonData: data
+    var yearAccident = req.query.yearAccident;
+    if(weekDay != undefined){
+        if (weekDay.indexOf("--") > -1 || weekDay.indexOf("'") > -1 || weekDay.indexOf(";") > -1 || weekDay.indexOf("/*") > -1 || weekDay.indexOf("xp_") > -1){
+            console.log("Bad request detected");
+            res.redirect('/map');
+            return;
+        } else {
+            console.log("Request passed")
+            var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.dia_semana = \'" + weekDay + "\' LIMIT " + queryLimit + ") As f) As fc";
+            var client = new Client(conString);
+            client.connect();
+            var query = client.query(new Query(filter_query)); // Run our Query
+            query.on("row", function (row, result) {
+                result.addRow(row);
             });
-        });
-    };
+            query.on("end", function (result) {
+                var data = result.rows[0].row_to_json
+                res.render('map', {
+                    title: "Express API",
+                    jsonData: data
+                });
+            });
+        };
+    }
+    else if(yearAccident != undefined){
+        if (yearAccident.indexOf("--") > -1 || yearAccident.indexOf("'") > -1 || yearAccident.indexOf(";") > -1 || yearAccident.indexOf("/*") > -1 || yearAccident.indexOf("xp_") > -1){
+            console.log("Bad request detected");
+            res.redirect('/map');
+            return;
+        } else {
+            console.log("Request passed")
+            var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.ano = \'" + yearAccident + "\' LIMIT " + queryLimit + ") As f) As fc";
+            var client = new Client(conString);
+            client.connect();
+            var query = client.query(new Query(filter_query)); // Run our Query
+            query.on("row", function (row, result) {
+                result.addRow(row);
+            });
+            query.on("end", function (result) {
+                var data = result.rows[0].row_to_json
+                res.render('map', {
+                    title: "Express API",
+                    jsonData: data
+                });
+            });
+        };
+    }
 });
 
 

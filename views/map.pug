@@ -20,7 +20,23 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='Sábado') Sábado
             option(value='Domingo') Domingo
         input(type='hidden', value='Submit')
-    #chart1
+    form(name='yearForm' action='/filter')
+        select(name='yearAccident' id='yearAccident' hidden)
+            option(disabled='', selected='', value='') Ano
+            option(value='2007') 2007
+            option(value='2008') 2008
+            option(value='2009') 2009
+            option(value='2010') 2010
+            option(value='2011') 2011
+            option(value='2012') 2012
+            option(value='2013') 2013
+            option(value='2014') 2014
+            option(value='2015') 2015
+            option(value='2016') 2016
+            option(value='2017') 2017
+            option(value='2018') 2018
+        input(type='hidden', value='Submit')
+    #chartWeekDay
         canvas(id="bar-chart")
         script.
             var myData = !{JSON.stringify(jsonData)};
@@ -85,7 +101,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         text: 'Número de acidentes por dia da semana'
                     },
                     maintainAspectRatio: false,
-                    onClick: chartClickEvent,
+                    onClick: weekChartClickEvent,
                     responsive: true,
                     scales: {
                         yAxes: [{
@@ -96,13 +112,67 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                 }
             });
-            function chartClickEvent(event, array){
+            function weekChartClickEvent(event, array){
                 var choosen = array[0]._view.label; //we have the name of bar clicked, use to filter
                 var element = document.getElementById("weekDay");
                 element.value = choosen;
                 document.weekDayForm.submit();
             }
-    #chart2
+    #chartYears
+        canvas(id="mixed-chart")
+        script.
+            var myData = !{JSON.stringify(jsonData)};
+            var myDataFeatures = myData.features;
+            const yearDataGoes = 2018;
+            const yearStarted = 2007;
+            var accidentsPerYear = new Array(yearDataGoes - yearStarted).fill(0);
+            var years = ['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018']
+            for(var i = 0; i < myDataFeatures.length; i++) {
+                var obj = myDataFeatures[i];
+                accidentsPerYear[yearDataGoes - obj.properties.f5]++;
+            }
+            console.log(accidentsPerYear);
+            var line_chart = new Chart(document.getElementById("mixed-chart"), {
+                type: 'line',
+                data: {
+                labels: years,
+                datasets: [
+                    {
+                    label: "Quantidade de acidentes",
+                    //backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850", "yellow", "orange", "green", "blue", "grey", "gold", "brown"],
+                    borderColor: "#3e95cd",
+                    fill:false,
+                    data: [accidentsPerYear[11], accidentsPerYear[10], accidentsPerYear[9], accidentsPerYear[8], accidentsPerYear[7], accidentsPerYear[6],
+                    accidentsPerYear[5], accidentsPerYear[4], accidentsPerYear[3], accidentsPerYear[2], accidentsPerYear[1], accidentsPerYear[0]]
+                    }
+                ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Acidentes por ano'
+                    },
+                    maintainAspectRatio: false,
+                    onClick: yearchartClickEvent,
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+            });
+
+            function yearchartClickEvent(event, array){
+                var choosen = years[array[0]._index]; //index have info of Year index on array
+                var element = document.getElementById("yearAccident");
+                element.value = choosen;
+                document.yearForm.submit();
+            }
+    #chartRegions
         canvas(id="mixed-chart")
         script.
             var myData = !{JSON.stringify(jsonData)};
