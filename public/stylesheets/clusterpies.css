@@ -1,7 +1,9 @@
 #map {
-  width:60%;
-  height:1000px;
+  width:50%;
+  height:1280px;
   float: right;
+  margin: 0;
+	padding: 0;
 }
 #legend {
   position: absolute;
@@ -17,7 +19,7 @@
   background: rgba(255,255,255,0.6);
   float: right;
   margin-left: 25%;
-  margin-top: 220px;
+  margin-top: 0px;
 }
 .legendheading {
   position: relative;
@@ -137,21 +139,20 @@
 
 #chartWeekDay {
     float: left;
-    width:40%;
+    width:50%;
     height:200px;
-    left: 50%;
 }
 
 #chartYears {
   float: left;
-  width:40%;
+  width:50%;
   height:200px;
-  left: 50%;
 }
 
-#chart2 {
+#chart {
   float: left;
-  width:40%;
-  height:200px;
-  left: 50%;
+  width:50%;
+  height:1000px;
+  margin: 0;
+	padding: 0;
 }
