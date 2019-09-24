@@ -94,7 +94,11 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         function defineFeaturePopup(feature, layer) {
             var props = feature.properties,
                 fields = metadata.fields,
-                popupContent = '';
+
+                //here we get the lat, lng to use it on a Maps link
+                lat = feature.geometry.coordinates[1];
+                lng = feature.geometry.coordinates[0];
+                popupContent = '<a href="https://www.google.com/maps/search/?api=1&query='+lat+','+lng+' " target="_blank">Acessar no Maps</a>';
             popupFields.map( function(key) {
                 if (props[key]) {
                     var val = props[key],
@@ -403,9 +407,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         text: 'Causas dos acidentes'
                     }
                     }
-                });
-                
-                
+                });  
         #chartRegions
             canvas(id="mixed-chart")
             script.
