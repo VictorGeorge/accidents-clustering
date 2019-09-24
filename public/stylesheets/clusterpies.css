@@ -149,6 +149,12 @@
   height:200px;
 }
 
+#chartCauses {
+  float: left;
+  width:25%;
+  height:180px;
+}
+
 #chart {
   float: left;
   width:50%;

@@ -13,6 +13,19 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         var myData = !{JSON.stringify(jsonData)};
         "use strict"
         console.log(myData);
+        var occurrence = function (array) {
+            var result = {};
+            if (array instanceof Array) { // Check if input is array.
+                array.forEach(function (v, i) {
+                    if (!result[v]) { // Initial object property creation.
+                        result[v] = [i]; // Create an array for that property.
+                    } else { // Same occurrences found.
+                        result[v].push(i); // Fill the array.
+                    }
+                });
+            }
+            return result;
+        };
         var geojson,
             metadata,
             geojsonPath = 'exemploFiltro.geojson',
@@ -368,6 +381,31 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     element.value = choosen;
                     document.yearForm.submit();
                 }
+        #chartCauses
+            canvas(id="pie-chart")
+            script.
+                var causesAccidents = !{JSON.stringify(causesData)};                
+                var causesCount = causesAccidents.rows;
+                //console.log(causesCount);
+                var piechartCauses = new Chart(document.getElementById("pie-chart"), {
+                    type: 'pie',
+                    data: {
+                    labels: [causesCount[0].causa_acidente, causesCount[1].causa_acidente, causesCount[2].causa_acidente, causesCount[3].causa_acidente, causesCount[4].causa_acidente],
+                    datasets: [{
+                        label: "Causas",
+                        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                        data: [causesCount[0].count,causesCount[1].count,causesCount[2].count,causesCount[3].count,causesCount[4].count]
+                    }]
+                    },
+                    options: {
+                    title: {
+                        display: true,
+                        text: 'Causas dos acidentes'
+                    }
+                    }
+                });
+                
+                
         #chartRegions
             canvas(id="mixed-chart")
             script.
@@ -422,3 +460,5 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     element.value = choosen;
                     document.weekDayForm.submit();
                 }
+
+                

@@ -16,6 +16,10 @@ const queryLimit = 50000;
 // Set up your database query to display GeoJSON
 var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg LIMIT " + queryLimit + ") As f) As fc";
 
+//Get the 5 most common causes of accidents
+var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -46,12 +50,20 @@ router.get('/map', function(req, res) {
     query.on("row", function (row, result) {
         result.addRow(row);
     });
+    var queryCauses = client.query(new Query(causesQuery)); // Run our Query
+    queryCauses.on("row", function (row, resultCauses) {
+        resultCauses.addRow(row);
+    });
     // Pass the result to the map page
     query.on("end", function (result) {
         var data = result.rows[0].row_to_json // Save the JSON as variable data
-        res.render('map', {
-            title: "Express API", // Give a title to our page
-            jsonData: data // Pass data to the View
+
+        queryCauses.on("end", function (resultCauses) {
+            res.render('map', {
+                title: "Express API", // Give a title to our page
+                jsonData: data, // Pass data to the View
+                causesData: resultCauses
+            });
         });
     });
 });
@@ -69,17 +81,28 @@ router.get('/filter*', function (req, res) {
         } else {
             console.log("Request passed")
             var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.dia_semana = \'" + weekDay + "\' LIMIT " + queryLimit + ") As f) As fc";
+            var causesQueryFiltered = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE dia_semana = \'" + weekDay + "\'  GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+
             var client = new Client(conString);
             client.connect();
             var query = client.query(new Query(filter_query)); // Run our Query
             query.on("row", function (row, result) {
                 result.addRow(row);
             });
+            var queryCauses = client.query(new Query(causesQueryFiltered)); // Run our Query
+            queryCauses.on("row", function (row, resultCauses) {
+                resultCauses.addRow(row);
+            });
+            // Pass the result to the map page
             query.on("end", function (result) {
-                var data = result.rows[0].row_to_json
-                res.render('map', {
-                    title: "Express API",
-                    jsonData: data
+                var data = result.rows[0].row_to_json // Save the JSON as variable data
+
+                queryCauses.on("end", function (resultCauses) {
+                    res.render('map', {
+                        title: "Express API", // Give a title to our page
+                        jsonData: data, // Pass data to the View
+                        causesData: resultCauses
+                    });
                 });
             });
         };
@@ -92,17 +115,28 @@ router.get('/filter*', function (req, res) {
         } else {
             console.log("Request passed")
             var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.ano = \'" + yearAccident + "\' LIMIT " + queryLimit + ") As f) As fc";
+            var causesQueryFiltered = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = \'" + yearAccident + "\'  GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+
             var client = new Client(conString);
             client.connect();
             var query = client.query(new Query(filter_query)); // Run our Query
             query.on("row", function (row, result) {
                 result.addRow(row);
             });
+            var queryCauses = client.query(new Query(causesQueryFiltered)); // Run our Query
+            queryCauses.on("row", function (row, resultCauses) {
+                resultCauses.addRow(row);
+            });
+            // Pass the result to the map page
             query.on("end", function (result) {
-                var data = result.rows[0].row_to_json
-                res.render('map', {
-                    title: "Express API",
-                    jsonData: data
+                var data = result.rows[0].row_to_json // Save the JSON as variable data
+
+                queryCauses.on("end", function (resultCauses) {
+                    res.render('map', {
+                        title: "Express API", // Give a title to our page
+                        jsonData: data, // Pass data to the View
+                        causesData: resultCauses
+                    });
                 });
             });
         };
