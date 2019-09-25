@@ -150,15 +150,23 @@
 }
 
 #chartCauses {
-  float: left;
+  width:20%;
+  height:160px;
+}
+
+#chartHours {
   width:25%;
-  height:180px;
+  height:200px;
+}
+
+#chartCauses, #chartHours{
+     display: inline-block;   
 }
 
 #chart {
   float: left;
   width:50%;
-  height:1000px;
+  height:1280px;
   margin: 0;
 	padding: 0;
 }

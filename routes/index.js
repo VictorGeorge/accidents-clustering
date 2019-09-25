@@ -19,6 +19,9 @@ var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' A
 //Get the 5 most common causes of accidents
 var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
 
+//Get the 5 most common hours of accidents
+var hoursQuery = "SELECT extract(hour from horario), COUNT(*)from public.accidents GROUP BY extract(hour from horario) ORDER BY count(*) DESC LIMIT 5";
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -50,19 +53,28 @@ router.get('/map', function(req, res) {
     query.on("row", function (row, result) {
         result.addRow(row);
     });
-    var queryCauses = client.query(new Query(causesQuery)); // Run our Query
+    var queryCauses = client.query(new Query(causesQuery)); // Run our causesQuery
     queryCauses.on("row", function (row, resultCauses) {
         resultCauses.addRow(row);
     });
+    var queryHours = client.query(new Query(hoursQuery)); // Run our causesQuery
+    queryHours.on("row", function (row, resultHours) {
+        resultHours.addRow(row);
+    });
+
     // Pass the result to the map page
     query.on("end", function (result) {
         var data = result.rows[0].row_to_json // Save the JSON as variable data
 
         queryCauses.on("end", function (resultCauses) {
-            res.render('map', {
-                title: "Express API", // Give a title to our page
-                jsonData: data, // Pass data to the View
-                causesData: resultCauses
+            
+            queryHours.on("end", function (resultHours) {
+                res.render('map', {
+                    title: "Express API", // Give a title to our page
+                    jsonData: data, // Pass data to the View
+                    causesData: resultCauses,
+                    hoursData: resultHours
+                });
             });
         });
     });
@@ -93,15 +105,22 @@ router.get('/filter*', function (req, res) {
             queryCauses.on("row", function (row, resultCauses) {
                 resultCauses.addRow(row);
             });
+            var queryHours = client.query(new Query(hoursQuery)); // Run our causesQuery
+            queryHours.on("row", function (row, resultHours) {
+                resultHours.addRow(row);
+            });
             // Pass the result to the map page
             query.on("end", function (result) {
                 var data = result.rows[0].row_to_json // Save the JSON as variable data
 
                 queryCauses.on("end", function (resultCauses) {
-                    res.render('map', {
-                        title: "Express API", // Give a title to our page
-                        jsonData: data, // Pass data to the View
-                        causesData: resultCauses
+                    queryHours.on("end", function (resultHours) {
+                        res.render('map', {
+                            title: "Express API", // Give a title to our page
+                            jsonData: data, // Pass data to the View
+                            causesData: resultCauses,
+                            hoursData: resultHours
+                        });
                     });
                 });
             });
@@ -127,15 +146,22 @@ router.get('/filter*', function (req, res) {
             queryCauses.on("row", function (row, resultCauses) {
                 resultCauses.addRow(row);
             });
+            var queryHours = client.query(new Query(hoursQuery)); // Run our causesQuery
+            queryHours.on("row", function (row, resultHours) {
+                resultHours.addRow(row);
+            });
             // Pass the result to the map page
             query.on("end", function (result) {
                 var data = result.rows[0].row_to_json // Save the JSON as variable data
 
                 queryCauses.on("end", function (resultCauses) {
-                    res.render('map', {
-                        title: "Express API", // Give a title to our page
-                        jsonData: data, // Pass data to the View
-                        causesData: resultCauses
+                    queryHours.on("end", function (resultHours) {
+                        res.render('map', {
+                            title: "Express API", // Give a title to our page
+                            jsonData: data, // Pass data to the View
+                            causesData: resultCauses,
+                            hoursData: resultHours
+                        });
                     });
                 });
             });

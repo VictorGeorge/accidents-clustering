@@ -12,7 +12,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
     script.
         var myData = !{JSON.stringify(jsonData)};
         "use strict"
-        console.log(myData);
+        //console.log(myData);
         var occurrence = function (array) {
             var result = {};
             if (array instanceof Array) { // Check if input is array.
@@ -404,63 +404,43 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     options: {
                     title: {
                         display: true,
-                        text: 'Causas dos acidentes'
+                        text: 'Principais causas dos acidentes'
                     }
                     }
                 });  
-        #chartRegions
-            canvas(id="mixed-chart")
+        #chartHours
+            canvas(id="bar-chart-horizontal")
             script.
-                var myData = !{JSON.stringify(jsonData)};
-                var myDataFeatures = myData.features;
-                const yearDataGoes = 2018;
-                const yearStarted = 2007;
-                var accidentsPerYear = new Array(yearDataGoes - yearStarted).fill(0);
-                var years = ['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018']
-                for(var i = 0; i < myDataFeatures.length; i++) {
-                    var obj = myDataFeatures[i];
-                    accidentsPerYear[yearDataGoes - obj.properties.f5]++;
-                }
-                console.log(accidentsPerYear);
-                var line_chart = new Chart(document.getElementById("mixed-chart"), {
-                    type: 'line',
+                var hoursAccidents = !{JSON.stringify(hoursData)};               
+                var hoursCount = hoursAccidents.rows;
+                var piechartHours = new Chart(document.getElementById("bar-chart-horizontal"), {
+                    type: 'horizontalBar',
                     data: {
-                    labels: years,
-                    datasets: [
-                        {
-                        label: "Quantidade de acidentes",
-                        //backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850", "yellow", "orange", "green", "blue", "grey", "gold", "brown"],
-                        borderColor: "#3e95cd",
-                        fill:false,
-                        data: [accidentsPerYear[11], accidentsPerYear[10], accidentsPerYear[9], accidentsPerYear[8], accidentsPerYear[7], accidentsPerYear[6],
-                        accidentsPerYear[5], accidentsPerYear[4], accidentsPerYear[3], accidentsPerYear[2], accidentsPerYear[1], accidentsPerYear[0]]
-                        }
-                    ]
+                    labels: [hoursCount[0].date_part+':00-'+hoursCount[0].date_part+':59', hoursCount[1].date_part+':00-'+hoursCount[1].date_part+':59', hoursCount[2].date_part+':00-'+hoursCount[2].date_part+':59',
+                    hoursCount[3].date_part+':00-'+hoursCount[3].date_part+':59', hoursCount[4].date_part+':00-'+hoursCount[4].date_part+':59'],
+                    datasets: [{
+                        label: "Horários",
+                        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                        data: [hoursCount[0].count,hoursCount[1].count,hoursCount[2].count,hoursCount[3].count,hoursCount[4].count]
+                    }]
                     },
                     options: {
-                        legend: { display: false },
-                        title: {
-                            display: true,
-                            text: 'Acidentes por ano'
-                        },
-                        maintainAspectRatio: false,
-                        onClick: chartClickEvent,
-                        responsive: true,
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero:true
-                                }
-                            }]
-                        }
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                min: 0 // Edit the value according to what you need
+                            }
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    },
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Principais horários dos acidentes'
                     }
-                });
-
-                function chartClickEvent(event, array){
-                    var choosen = array[0]._view.label; //we have the name of bar clicked, use to filter
-                    var element = document.getElementById("weekDay");
-                    element.value = choosen;
-                    document.weekDayForm.submit();
-                }
+                    }
+                });  
 
                 
