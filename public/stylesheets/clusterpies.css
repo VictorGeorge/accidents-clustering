@@ -66,10 +66,10 @@
 
 /*marker categories*/
 .category-1{
-  fill: #F88;
-  stroke: #800;
-  background: #F88;
-  border-color: #800;
+  fill: 	#fb4f4f;
+  stroke: #8c0303;
+  background: 	#fb4f4f;
+  border-color: #8c0303;
 }
 .category-2{
   fill: #FA0;
@@ -78,10 +78,10 @@
   border-color: #B60;
 }
 .category-3{
-  fill: #FF3;
-  stroke: #D80;
-  background: #FF3;
-  border-color: #D80;
+  fill: #fbc93d;
+  stroke: #af8104;
+  background: #fbc93d;
+  border-color: #af8104;
 }
 .category-4{
   fill: #BFB;
@@ -90,10 +90,10 @@
   border-color: #070;
 }
 .category-5{
-  fill: #9DF;
-  stroke: #007;
-  background: #9DF;
-  border-color: #007;
+  fill: #6cc0e5;
+  stroke: #18688b;
+  background: #6cc0e5;
+  border-color: #18688b;
 }
 .category-6{
   fill: #CCC;
@@ -157,6 +157,11 @@
 #chartHours {
   width:25%;
   height:200px;
+}
+
+#chartStates{
+  width:25%;
+  height:100px;
 }
 
 #chartCauses, #chartHours{

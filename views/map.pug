@@ -1,6 +1,6 @@
 doctype html
 meta(charset='utf-8')
-title ClusterPies
+title Acidentes nas Rodovias Federais
 link(rel='stylesheet', href='http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css')
 link(href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css', rel='stylesheet')
 link(rel='stylesheet', href='/stylesheets/clusterpies.css')
@@ -248,7 +248,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='2017') 2017
             option(value='2018') 2018
         input(type='hidden', value='Submit')
-    #charts
+    #charts 
         #chartWeekDay
             canvas(id="bar-chart")
             script.
@@ -302,7 +302,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     datasets: [
                         {
                         label: "Quantidade de acidentes",
-                        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850", "yellow", "orange"],
+                        backgroundColor: ["#fdb94e", "#f9a852","#f69653","#f38654","#f07654", "#ed6856", "#ef5956"],
                         data: [segunda,terca,quarta,quinta,sexta, sabado, domingo]
                         }
                     ]
@@ -397,7 +397,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     labels: [causesCount[0].causa_acidente, causesCount[1].causa_acidente, causesCount[2].causa_acidente, causesCount[3].causa_acidente, causesCount[4].causa_acidente],
                     datasets: [{
                         label: "Causas",
-                        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                        backgroundColor: ["#ef4947", "#33b9e1","#1a92c0","#006c9f","#003254"],
                         data: [causesCount[0].count,causesCount[1].count,causesCount[2].count,causesCount[3].count,causesCount[4].count]
                     }]
                     },
@@ -420,7 +420,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     hoursCount[3].date_part+':00-'+hoursCount[3].date_part+':59', hoursCount[4].date_part+':00-'+hoursCount[4].date_part+':59'],
                     datasets: [{
                         label: "Horários",
-                        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                        backgroundColor: ["#edee50", "#69f49c","#aec5ec","#d55fe3","#257aa3"],
                         data: [hoursCount[0].count,hoursCount[1].count,hoursCount[2].count,hoursCount[3].count,hoursCount[4].count]
                     }]
                     },
@@ -441,6 +441,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         text: 'Principais horários dos acidentes'
                     }
                     }
-                });  
+                }); 
+        
 
                 
