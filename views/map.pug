@@ -26,6 +26,11 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             }
             return result;
         };
+        var previousBackgroundColorWeekDay;
+        var previousBackgroundPositionWeekDay;
+        var previousBackgroundPositionYears;
+        var previousBackgroundColorCauses;
+        var previousBackgroundPositionCauses;
         var geojson,
             metadata,
             geojsonPath = 'exemploFiltro.geojson',
@@ -231,8 +236,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='Sexta') Sexta
             option(value='Sábado') Sábado
             option(value='Domingo') Domingo
-        input(type='hidden', value='Submit')
-    form(name='yearForm' action='/filter')
         select(name='yearAccident' id='yearAccident' hidden)
             option(disabled='', selected='', value='') Ano
             option(value='2007') 2007
@@ -247,7 +250,14 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='2016') 2016
             option(value='2017') 2017
             option(value='2018') 2018
-        input(type='hidden', value='Submit')
+        select(name='causesAccident' id='causesAccident' hidden)
+            option(disabled='', selected='', value='') Causas
+            option(value='0') 0
+            option(value='1') 1
+            option(value='2') 2
+            option(value='3') 3
+            option(value='4') 4
+        input(type='submit', value='Submit')
     #charts 
         #chartWeekDay
             canvas(id="bar-chart")
@@ -329,7 +339,14 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     var choosen = array[0]._view.label; //we have the name of bar clicked, use to filter
                     var element = document.getElementById("weekDay");
                     element.value = choosen;
-                    document.weekDayForm.submit();
+                    var elementIndex = array[0]._index;
+                    if(this.previousBackgroundColorWeekDay){
+                        this.data.datasets[0].backgroundColor[this.previousBackgroundPositionWeekDay] = this.previousBackgroundColorWeekDay; //Swap old selected to previous color
+                    }
+                    this.previousBackgroundColorWeekDay = this.data.datasets[0].backgroundColor[elementIndex];
+                    this.previousBackgroundPositionWeekDay = elementIndex;
+                    this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    this.update();
                 }
         #chartYears
             canvas(id="mixed-chart")
@@ -344,7 +361,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     var obj = myDataFeatures[i];
                     accidentsPerYear[yearDataGoes - obj.properties.f5]++;
                 }
-                console.log(accidentsPerYear);
+                //console.log(accidentsPerYear);
                 var line_chart = new Chart(document.getElementById("mixed-chart"), {
                     type: 'line',
                     data: {
@@ -356,7 +373,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         borderColor: "#3e95cd",
                         fill:false,
                         data: [accidentsPerYear[11], accidentsPerYear[10], accidentsPerYear[9], accidentsPerYear[8], accidentsPerYear[7], accidentsPerYear[6],
-                        accidentsPerYear[5], accidentsPerYear[4], accidentsPerYear[3], accidentsPerYear[2], accidentsPerYear[1], accidentsPerYear[0]]
+                        accidentsPerYear[5], accidentsPerYear[4], accidentsPerYear[3], accidentsPerYear[2], accidentsPerYear[1], accidentsPerYear[0]],
+                        pointBackgroundColor: ["gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray"]
                         }
                     ]
                     },
@@ -383,7 +401,14 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     var choosen = years[array[0]._index]; //index have info of Year index on array
                     var element = document.getElementById("yearAccident");
                     element.value = choosen;
-                    document.yearForm.submit();
+
+                    var elementIndex = array[0]._index;
+                    if(this.previousBackgroundPositionYears){
+                        this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'gray'; //Swap old selected to previous color
+                    }
+                    this.previousBackgroundPositionYears = elementIndex;
+                    this.data.datasets[0].pointBackgroundColor[elementIndex] = 'red';
+                    this.update();
                 }
         #chartCauses
             canvas(id="pie-chart")
@@ -402,12 +427,27 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }]
                     },
                     options: {
+                        onClick: causesClickEvent,
                     title: {
                         display: true,
                         text: 'Principais causas dos acidentes'
                     }
                     }
-                });  
+                });
+                function causesClickEvent(event, array){
+                    var choosen = array[0]._index;
+                    var element = document.getElementById("causesAccident");
+                    element.value = choosen;
+                    console.log(choosen);
+                    var elementIndex = array[0]._index;
+                    if(this.previousBackgroundColorCauses){
+                        this.data.datasets[0].backgroundColor[this.previousBackgroundPositionCauses] = this.previousBackgroundColorCauses; //Swap old selected to previous color
+                    }
+                    this.previousBackgroundColorCauses = this.data.datasets[0].backgroundColor[elementIndex];
+                    this.previousBackgroundPositionCauses = elementIndex;
+                    this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    this.update();
+                }
         #chartHours
             canvas(id="bar-chart-horizontal")
             script.
