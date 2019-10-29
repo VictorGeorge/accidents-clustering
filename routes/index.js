@@ -11,10 +11,10 @@ var host = "localhost:5432"
 var database = "accidents" // database name
 var conString = "postgres://"+username+":"+password+"@"+host+"/"+database; // Your Database Connection
 
-const queryLimit = 75000;
+const queryLimit = 120000;
 
 // Set up your database query to display GeoJSON
-var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg WHERE lg.br = \'" + 116 + "\' LIMIT " + queryLimit + ") As f) As fc";
+var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
 
 //Get the 5 most common causes of accidents
 var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
