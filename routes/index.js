@@ -17,10 +17,10 @@ const queryLimit = 120000;
 var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
 
 //Get the 5 most common causes of accidents
-var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
 
 //Get the 5 most common hours of accidents
-var hoursQuery = "SELECT extract(hour from horario), COUNT(*)from public.accidents GROUP BY extract(hour from horario) ORDER BY count(*) DESC LIMIT 5";
+var hoursQuery = "SELECT extract(hour from horario), COUNT(*)from public.accidents WHERE ano = 2018 GROUP BY extract(hour from horario) ORDER BY count(*) DESC LIMIT 5";
 
 //Get the 10 most common states
 var statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";

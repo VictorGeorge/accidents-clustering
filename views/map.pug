@@ -378,7 +378,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     datasets: [
                         {
                         label: "Quantidade de acidentes",
-                        //backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850", "yellow", "orange", "green", "blue", "grey", "gold", "brown"],
                         borderColor: "#3e95cd",
                         fill:false,
                         data: [accidentsPerYear[11], accidentsPerYear[10], accidentsPerYear[9], accidentsPerYear[8], accidentsPerYear[7], accidentsPerYear[6],
@@ -424,13 +423,11 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             script.
                 var causesAccidents = !{JSON.stringify(causesData)};                
                 var causesCount = causesAccidents.rows;
-                //console.log(causesCount);
                 var piechartCauses = new Chart(document.getElementById("pie-chart"), {
                     type: 'pie',
                     data: {
                     labels: [causesCount[0].causa_acidente, causesCount[1].causa_acidente, causesCount[2].causa_acidente, causesCount[3].causa_acidente, causesCount[4].causa_acidente],
                     datasets: [{
-                        label: "Causas",
                         backgroundColor: ["#ef4947", "#33b9e1","#1a92c0","#006c9f","#003254"],
                         data: [causesCount[0].count,causesCount[1].count,causesCount[2].count,causesCount[3].count,causesCount[4].count]
                     }]
@@ -467,7 +464,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     labels: [hoursCount[0].date_part+':00-'+hoursCount[0].date_part+':59', hoursCount[1].date_part+':00-'+hoursCount[1].date_part+':59', hoursCount[2].date_part+':00-'+hoursCount[2].date_part+':59',
                     hoursCount[3].date_part+':00-'+hoursCount[3].date_part+':59', hoursCount[4].date_part+':00-'+hoursCount[4].date_part+':59'],
                     datasets: [{
-                        label: "Horários",
+                        label: "Quantidade",
                         backgroundColor: ["#edee50", "#69f49c","#aec5ec","#d55fe3","#257aa3"],
                         data: [hoursCount[0].count,hoursCount[1].count,hoursCount[2].count,hoursCount[3].count,hoursCount[4].count]
                     }]
@@ -492,8 +489,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                 });
                 function hoursClickEvent(event, array){
-                    console.log(event);
-                    console.log(array);
                     var choosen = array[0]._index;
                     var element = document.getElementById("hoursAccident");
                     element.value = choosen;
