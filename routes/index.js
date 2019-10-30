@@ -25,6 +25,9 @@ var hoursQuery = "SELECT extract(hour from horario), COUNT(*)from public.acciden
 //Get the 10 most common states
 var statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
 
+//Get the 10 Br's with most accidents
+var brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 5";
+
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -60,13 +63,18 @@ router.get('/map', function (req, res) {
     queryCauses.on("row", function (row, resultCauses) {
         resultCauses.addRow(row);
     });
-    var queryHours = client.query(new Query(hoursQuery)); // Run our causesQuery
+    var queryHours = client.query(new Query(hoursQuery)); // Run our hoursQuery
     queryHours.on("row", function (row, resultHours) {
         resultHours.addRow(row);
     });
-    var queryStates = client.query(new Query(statesQuery)); // Run our causesQuery
+    var queryStates = client.query(new Query(statesQuery)); // Run our statesQuery
     queryStates.on("row", function (row, resultStates) {
         resultStates.addRow(row);
+    });
+
+    var queryBrs = client.query(new Query(brsQuery)); // Run our brsQuery
+    queryBrs.on("row", function (row, resultBrs) {
+        resultBrs.addRow(row);
     });
 
     // Pass the result to the map page
@@ -75,12 +83,15 @@ router.get('/map', function (req, res) {
         queryCauses.on("end", function (resultCauses) {
             queryHours.on("end", function (resultHours) {
                 queryStates.on("end", function (resultStates) {
-                    res.render('map', {
-                        title: "Express API", // Give a title to our page
-                        jsonData: data, // Pass data to the View
-                        causesData: resultCauses,
-                        hoursData: resultHours,
-                        statesData: resultStates
+                    queryBrs.on("end", function (resultBrs) {
+                        res.render('map', {
+                            title: "Express API", // Give a title to our page
+                            jsonData: data, // Pass data to the View
+                            causesData: resultCauses,
+                            hoursData: resultHours,
+                            statesData: resultStates,
+                            brsData: resultBrs
+                        });
                     });
                 });
             });
