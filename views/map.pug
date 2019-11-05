@@ -524,8 +524,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             script.
                 var brsAccidents = !{JSON.stringify(brsData)};               
                 var brsCount = brsAccidents.rows;
-                console.log(brsCount[1]);
-                if(brsCount[1].br != null){ //na vdd, se for nulo tem que preencher tudo com o primeiro result
+                if(brsAccidents.rowCount > 1){
                     var chartBrs = new Chart(document.getElementById("polar-chart"), {
                         type: 'polarArea',
                         data: {
@@ -535,6 +534,28 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                             label: "Quantidade:",
                             backgroundColor: ["#9b2948", "#ff7251","#ffca7b","#ffcd74","#ffedbf"], //https://www.color-hex.com/color-palette/1499
                             data: [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count]
+                            }
+                        ]
+                        },
+                        options: {
+                            onClick: brsClickEvent,
+                        title: {
+                            display: true,
+                            text: 'BRs com maior número de acidentes'
+                        }
+                        }
+                    });
+                }
+                else{
+                    var chartBrs = new Chart(document.getElementById("polar-chart"), {
+                        type: 'polarArea',
+                        data: {
+                        labels: ['BR-' + brsCount[0].br],
+                        datasets: [
+                            {
+                            label: "Quantidade:",
+                            backgroundColor: ["#9b2948"], //https://www.color-hex.com/color-palette/1499
+                            data: [brsCount[0].count]
                             }
                         ]
                         },

@@ -11,11 +11,10 @@ var host = "localhost:5432"
 var database = "accidents" // database name
 var conString = "postgres://"+username+":"+password+"@"+host+"/"+database; // Your Database Connection
 
-const queryLimit = 120000;
+const queryLimit = 12000;
 
 // Set up your database query to display GeoJSON
-var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg LIMIT " + queryLimit + ") As f) As fc";
-
+var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
 //Get the 5 most common causes of accidents
 var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
 
@@ -27,6 +26,12 @@ var statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BE
 
 //Get the 10 Br's with most accidents
 var brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 5";
+
+var mainQueryPrefix = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg ";
+
+var mainQuerySuffix = ") As f) As fc";
+
+
 
 
 /* GET home page. */
@@ -56,18 +61,19 @@ router.get('/map', async function (req, res) {
     doQueries(req, res);
 });
 
-async function doQueries(req, res) { 
+async function doQueries(req, res) {
     var client = new Client(conString); // Setup our Postgres Client
     await client.connect();
 
+    console.log(accidentsQuery);
     var resultQuery = await client.query(accidentsQuery);
     var data = resultQuery.rows[0].row_to_json // Save the JSON as variable data
     const resultCauses = await client.query(causesQuery);
     const resultHours = await client.query(hoursQuery);
     const resultStates = await client.query(statesQuery);
-    console.log(brsQuery);
+    //console.log(brsQuery);
     const resultBrs = await client.query(brsQuery);
-    console.log(resultBrs);
+    //console.log(resultBrs);
     await client.end();
     res.render('map', {
         title: "Accidents API", // Give a title to our page
@@ -82,68 +88,66 @@ async function doQueries(req, res) {
 //TODO: Refactor so it doesnt repeat code and prepare for multifilter
 /* GET the filtered page */
 router.get('/filter*', async function (req, res) {
+    var filters;
     var weekDay = req.query.weekDay;
     var yearAccident = req.query.yearAccident;
     var causesAccident = req.query.causesAccident;
     var hoursAccident = req.query.hoursAccident;
     var brsAccident = req.query.brsAccident;
+    let yearFilterString;
     //TODO: 1 metodo pra cada filtro, que faz a query e retorna, e um pras localizações msm, que tem que ter todos os filtros na query async await talvez?
+    if (yearAccident != undefined) {
+        if (isRequestValid(yearAccident) === true) {
+            filters = await yearFilter(yearAccident);
+        }
+        else
+            filters = await yearFilter(2018);
+    }
+    else
+        filters = await yearFilter(2018);
+
     if (weekDay != undefined) {
-        if (isRequestValid(weekDay) === false) {
-            console.log("Bad request detected");
-            res.redirect('/map');
-            return;
-        } else {
+        if (isRequestValid(weekDay) === true) {
             accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.dia_semana = \'" + weekDay + "\' LIMIT " + queryLimit + ") As f) As fc";
         }
     }
-    else if (yearAccident != undefined) {
-        if (isRequestValid(yearAccident) === false) {
-            console.log("Bad request detected");
-            res.redirect('/map');
-            return;
-        } else {
-            var weekdayQuery = weekdayFilter(weekDay);
-        }
-    }
-    else if (causesAccident != undefined) {
-        if (isRequestValid(causesAccident) === false) {
-            console.log("Bad request detected");
-            res.redirect('/map');
-            return;
-        } else {
+    if (causesAccident != undefined) {
+        if (isRequestValid(causesAccident) === true) {
             var causesAccident = weekdayFilter(causesAccident);
         }
     }
-    else if (hoursAccident != undefined) {
-        if (isRequestValid(hoursAccident) === false) {
-            console.log("Bad request detected");
-            res.redirect('/map');
-            return;
-        } else {
+    if (hoursAccident != undefined) {
+        if (isRequestValid(hoursAccident) === true) {
             var weekdayQuery = weekdayFilter(weekDay);
         }
     }
-    else if (brsAccident != undefined) {
-        if (isRequestValid(brsAccident) === false) {
-            console.log("Bad request detected");
-            res.redirect('/map');
-            return;
-        } else {
-            brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 AND br = \'" + brsAccident + "\' GROUP BY br ORDER BY count(*) DESC LIMIT 1";
-            console.log("mudou " + brsQuery);
+    if (brsAccident != undefined) {
+        if (isRequestValid(brsAccident) === true) {
+            brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 AND br = \'" + brsAccident + "\' GROUP BY br ORDER BY count(*) DESC LIMIT 1";//TODO
+            let brFilterString = await brFilter(brsAccident);
+            filters = filters.concat(brFilterString);
         }
     }
+    var filterString = mainQueryPrefix;
+    filterString = filterString.concat(filters, mainQuerySuffix);
+    accidentsQuery = filterString;
     doQueries(req, res);
 });
 
 function isRequestValid(request) {
     if (request != undefined) {
-        if (request.indexOf("--") > -1 || request.indexOf("'") > -1 || request.indexOf(";") > -1 || request.indexOf("/*") > -1 || request.indexOf("xp_") > -1)
+        if (request.indexOf("--") > -1 || request.indexOf("'") > -1 || request.indexOf(";") > -1 || request.indexOf("/*") > -1 || request.indexOf("xp_") > -1) {
+            console.log("Bad request detected");
+            res.redirect('/map');
             return false;
+        }
         else
             return true;
     }
+}
+
+async function yearFilter(yearAccident) {
+    return "WHERE lg.ano = \'" + yearAccident + "\' ";
 }
 
 async function weekdayFilter(weekDay) {
@@ -153,14 +157,8 @@ async function weekdayFilter(weekDay) {
     return result;
 }
 
-async function doQuery(query) {
-    var client = new Client(conString);
-    await client.connect();
-
-    const result = await client.query(query);
-
-    await client.end();
-    return result;
+async function brFilter(brsAccident) {
+    return "AND lg.br = \'" + brsAccident + "\' ";
 }
 
 
