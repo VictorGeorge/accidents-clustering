@@ -14,7 +14,7 @@ var conString = "postgres://"+username+":"+password+"@"+host+"/"+database; // Yo
 const queryLimit = 120000;
 
 // Set up your database query to display GeoJSON
-var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
+var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM accidents As lg LIMIT " + queryLimit + ") As f) As fc";
 
 //Get the 5 most common causes of accidents
 var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
@@ -52,140 +52,115 @@ router.get('/data', function (req, res) {
 });
 
 /* GET the map page */
-router.get('/map', function (req, res) {
-    var client = new Client(conString); // Setup our Postgres Client
-    client.connect(); // connect to the client
-    var query = client.query(new Query(accidentsQuery)); // Run our Query
-    query.on("row", function (row, result) {
-        result.addRow(row);
-    });
-    var queryCauses = client.query(new Query(causesQuery)); // Run our causesQuery
-    queryCauses.on("row", function (row, resultCauses) {
-        resultCauses.addRow(row);
-    });
-    var queryHours = client.query(new Query(hoursQuery)); // Run our hoursQuery
-    queryHours.on("row", function (row, resultHours) {
-        resultHours.addRow(row);
-    });
-    var queryStates = client.query(new Query(statesQuery)); // Run our statesQuery
-    queryStates.on("row", function (row, resultStates) {
-        resultStates.addRow(row);
-    });
-
-    var queryBrs = client.query(new Query(brsQuery)); // Run our brsQuery
-    queryBrs.on("row", function (row, resultBrs) {
-        resultBrs.addRow(row);
-    });
-
-    // Pass the result to the map page
-    query.on("end", function (result) {
-        var data = result.rows[0].row_to_json // Save the JSON as variable data
-        queryCauses.on("end", function (resultCauses) {
-            queryHours.on("end", function (resultHours) {
-                queryStates.on("end", function (resultStates) {
-                    queryBrs.on("end", function (resultBrs) {
-                        res.render('map', {
-                            title: "Express API", // Give a title to our page
-                            jsonData: data, // Pass data to the View
-                            causesData: resultCauses,
-                            hoursData: resultHours,
-                            statesData: resultStates,
-                            brsData: resultBrs
-                        });
-                    });
-                });
-            });
-        });
-    });
+router.get('/map', async function (req, res) {
+    doQueries(req, res);
 });
+
+async function doQueries(req, res) { 
+    var client = new Client(conString); // Setup our Postgres Client
+    await client.connect();
+
+    var resultQuery = await client.query(accidentsQuery);
+    var data = resultQuery.rows[0].row_to_json // Save the JSON as variable data
+    const resultCauses = await client.query(causesQuery);
+    const resultHours = await client.query(hoursQuery);
+    const resultStates = await client.query(statesQuery);
+    console.log(brsQuery);
+    const resultBrs = await client.query(brsQuery);
+    console.log(resultBrs);
+    await client.end();
+    res.render('map', {
+        title: "Accidents API", // Give a title to our page
+        jsonData: data, // Pass data to the View
+        causesData: resultCauses,
+        hoursData: resultHours,
+        statesData: resultStates,
+        brsData: resultBrs
+    });
+}
 
 //TODO: Refactor so it doesnt repeat code and prepare for multifilter
 /* GET the filtered page */
-router.get('/filter*', function (req, res) {
+router.get('/filter*', async function (req, res) {
     var weekDay = req.query.weekDay;
     var yearAccident = req.query.yearAccident;
+    var causesAccident = req.query.causesAccident;
+    var hoursAccident = req.query.hoursAccident;
+    var brsAccident = req.query.brsAccident;
+    //TODO: 1 metodo pra cada filtro, que faz a query e retorna, e um pras localizações msm, que tem que ter todos os filtros na query async await talvez?
     if (weekDay != undefined) {
-        if (weekDay.indexOf("--") > -1 || weekDay.indexOf("'") > -1 || weekDay.indexOf(";") > -1 || weekDay.indexOf("/*") > -1 || weekDay.indexOf("xp_") > -1) {
+        if (isRequestValid(weekDay) === false) {
             console.log("Bad request detected");
             res.redirect('/map');
             return;
         } else {
-            console.log("Request passed")
-            var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.dia_semana = \'" + weekDay + "\' LIMIT " + queryLimit + ") As f) As fc";
-            var causesQueryFiltered = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE dia_semana = \'" + weekDay + "\'  GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
-
-            var client = new Client(conString);
-            client.connect();
-            var query = client.query(new Query(filter_query)); // Run our Query
-            query.on("row", function (row, result) {
-                result.addRow(row);
-            });
-            var queryCauses = client.query(new Query(causesQueryFiltered)); // Run our Query
-            queryCauses.on("row", function (row, resultCauses) {
-                resultCauses.addRow(row);
-            });
-            var queryHours = client.query(new Query(hoursQuery)); // Run our causesQuery
-            queryHours.on("row", function (row, resultHours) {
-                resultHours.addRow(row);
-            });
-            // Pass the result to the map page
-            query.on("end", function (result) {
-                var data = result.rows[0].row_to_json // Save the JSON as variable data
-
-                queryCauses.on("end", function (resultCauses) {
-                    queryHours.on("end", function (resultHours) {
-                        res.render('map', {
-                            title: "Express API", // Give a title to our page
-                            jsonData: data, // Pass data to the View
-                            causesData: resultCauses,
-                            hoursData: resultHours
-                        });
-                    });
-                });
-            });
-        };
+            accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.dia_semana = \'" + weekDay + "\' LIMIT " + queryLimit + ") As f) As fc";
+        }
     }
     else if (yearAccident != undefined) {
-        if (yearAccident.indexOf("--") > -1 || yearAccident.indexOf("'") > -1 || yearAccident.indexOf(";") > -1 || yearAccident.indexOf("/*") > -1 || yearAccident.indexOf("xp_") > -1) {
+        if (isRequestValid(yearAccident) === false) {
             console.log("Bad request detected");
             res.redirect('/map');
             return;
         } else {
-            console.log("Request passed")
-            var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano)) As properties FROM accidents  As lg WHERE lg.ano = \'" + yearAccident + "\' LIMIT " + queryLimit + ") As f) As fc";
-            var causesQueryFiltered = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = \'" + yearAccident + "\'  GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
-
-            var client = new Client(conString);
-            client.connect();
-            var query = client.query(new Query(filter_query)); // Run our Query
-            query.on("row", function (row, result) {
-                result.addRow(row);
-            });
-            var queryCauses = client.query(new Query(causesQueryFiltered)); // Run our Query
-            queryCauses.on("row", function (row, resultCauses) {
-                resultCauses.addRow(row);
-            });
-            var queryHours = client.query(new Query(hoursQuery)); // Run our causesQuery
-            queryHours.on("row", function (row, resultHours) {
-                resultHours.addRow(row);
-            });
-            // Pass the result to the map page
-            query.on("end", function (result) {
-                var data = result.rows[0].row_to_json // Save the JSON as variable data
-
-                queryCauses.on("end", function (resultCauses) {
-                    queryHours.on("end", function (resultHours) {
-                        res.render('map', {
-                            title: "Express API", // Give a title to our page
-                            jsonData: data, // Pass data to the View
-                            causesData: resultCauses,
-                            hoursData: resultHours
-                        });
-                    });
-                });
-            });
-        };
+            var weekdayQuery = weekdayFilter(weekDay);
+        }
     }
+    else if (causesAccident != undefined) {
+        if (isRequestValid(causesAccident) === false) {
+            console.log("Bad request detected");
+            res.redirect('/map');
+            return;
+        } else {
+            var causesAccident = weekdayFilter(causesAccident);
+        }
+    }
+    else if (hoursAccident != undefined) {
+        if (isRequestValid(hoursAccident) === false) {
+            console.log("Bad request detected");
+            res.redirect('/map');
+            return;
+        } else {
+            var weekdayQuery = weekdayFilter(weekDay);
+        }
+    }
+    else if (brsAccident != undefined) {
+        if (isRequestValid(brsAccident) === false) {
+            console.log("Bad request detected");
+            res.redirect('/map');
+            return;
+        } else {
+            brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 AND br = \'" + brsAccident + "\' GROUP BY br ORDER BY count(*) DESC LIMIT 1";
+            console.log("mudou " + brsQuery);
+        }
+    }
+    doQueries(req, res);
 });
+
+function isRequestValid(request) {
+    if (request != undefined) {
+        if (request.indexOf("--") > -1 || request.indexOf("'") > -1 || request.indexOf(";") > -1 || request.indexOf("/*") > -1 || request.indexOf("xp_") > -1)
+            return false;
+        else
+            return true;
+    }
+}
+
+async function weekdayFilter(weekDay) {
+    console.log("Request passed");
+    var causesQueryFiltered = "AND lg.dia_semana = \'" + weekDay + "\' ";
+
+    return result;
+}
+
+async function doQuery(query) {
+    var client = new Client(conString);
+    await client.connect();
+
+    const result = await client.query(query);
+
+    await client.end();
+    return result;
+}
 
 
