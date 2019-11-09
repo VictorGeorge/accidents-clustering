@@ -427,13 +427,23 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             script.
                 var causesAccidents = !{JSON.stringify(causesData)};                
                 var causesCount = causesAccidents.rows;
+                if(causesAccidents.rowCount > 1){
+                    var backgroundColorCauses = ["#ef4947", "#33b9e1","#1a92c0","#006c9f","#003254"];
+                    var labelsCauses = [causesCount[0].causa_acidente, causesCount[1].causa_acidente, causesCount[2].causa_acidente, causesCount[3].causa_acidente, causesCount[4].causa_acidente];
+                    var dataCauses = [causesCount[0].count,causesCount[1].count,causesCount[2].count,causesCount[3].count,causesCount[4].count];
+                }
+                else{
+                    var backgroundColorCauses = ["#ef4947"];
+                    var labelsCauses = [causesCount[0].causa_acidente];
+                    var dataCauses = [causesCount[0].count];
+                }
                 var piechartCauses = new Chart(document.getElementById("pie-chart"), {
                     type: 'pie',
                     data: {
-                    labels: [causesCount[0].causa_acidente, causesCount[1].causa_acidente, causesCount[2].causa_acidente, causesCount[3].causa_acidente, causesCount[4].causa_acidente],
+                    labels: labelsCauses,
                     datasets: [{
-                        backgroundColor: ["#ef4947", "#33b9e1","#1a92c0","#006c9f","#003254"],
-                        data: [causesCount[0].count,causesCount[1].count,causesCount[2].count,causesCount[3].count,causesCount[4].count]
+                        backgroundColor: backgroundColorCauses,
+                        data: dataCauses
                     }]
                     },
                     options: {
@@ -469,15 +479,25 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             script.
                 var hoursAccidents = !{JSON.stringify(hoursData)};               
                 var hoursCount = hoursAccidents.rows;
-                var piechartHours = new Chart(document.getElementById("bar-chart-horizontal"), {
+                if(hoursAccidents.rowCount > 1){
+                    var backgroundColorHours = ["#edee50", "#69f49c","#aec5ec","#d55fe3","#257aa3"];
+                    var labelsHours = [hoursCount[0].hora+':00-'+hoursCount[0].hora+':59', hoursCount[1].hora+':00-'+hoursCount[1].hora+':59', hoursCount[2].hora+':00-'+hoursCount[2].hora+':59',
+                    hoursCount[3].hora+':00-'+hoursCount[3].hora+':59', hoursCount[4].hora+':00-'+hoursCount[4].hora+':59'];
+                    var dataHours = [hoursCount[0].count,hoursCount[1].count,hoursCount[2].count,hoursCount[3].count,hoursCount[4].count];
+                }
+                else{
+                    var backgroundColorHours = ["#69f49c"];
+                    var labelsHours = [hoursCount[0].hora+':00-'+hoursCount[0].hora+':59'];
+                    var dataHours = [hoursCount[0].count];
+                }
+                var barchartHours = new Chart(document.getElementById("bar-chart-horizontal"), {
                     type: 'horizontalBar',
                     data: {
-                    labels: [hoursCount[0].date_part+':00-'+hoursCount[0].date_part+':59', hoursCount[1].date_part+':00-'+hoursCount[1].date_part+':59', hoursCount[2].date_part+':00-'+hoursCount[2].date_part+':59',
-                    hoursCount[3].date_part+':00-'+hoursCount[3].date_part+':59', hoursCount[4].date_part+':00-'+hoursCount[4].date_part+':59'],
+                    labels: labelsHours,
                     datasets: [{
                         label: "Quantidade",
-                        backgroundColor: ["#edee50", "#69f49c","#aec5ec","#d55fe3","#257aa3"],
-                        data: [hoursCount[0].count,hoursCount[1].count,hoursCount[2].count,hoursCount[3].count,hoursCount[4].count]
+                        backgroundColor: backgroundColorHours,
+                        data: dataHours
                     }]
                     },
                     options: {
@@ -505,10 +525,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
 
                     //Create new option for selected Hour
                     var opt = document.createElement('option');
-                    opt.value = hoursCount[choosen].date_part;
-                    opt.innerHTML = hoursCount[choosen].date_part;
+                    opt.value = hoursCount[choosen].hora;
+                    opt.innerHTML = hoursCount[choosen].hora;
                     element.appendChild(opt);
-                    element.value = hoursCount[choosen].date_part;
+                    element.value = hoursCount[choosen].hora;
                     
                     var elementIndex = array[0]._index;
                     if(this.previousBackgroundColorHours){
@@ -525,49 +545,35 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 var brsAccidents = !{JSON.stringify(brsData)};               
                 var brsCount = brsAccidents.rows;
                 if(brsAccidents.rowCount > 1){
-                    var chartBrs = new Chart(document.getElementById("polar-chart"), {
-                        type: 'polarArea',
-                        data: {
-                        labels: ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br],
-                        datasets: [
-                            {
-                            label: "Quantidade:",
-                            backgroundColor: ["#9b2948", "#ff7251","#ffca7b","#ffcd74","#ffedbf"], //https://www.color-hex.com/color-palette/1499
-                            data: [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count]
-                            }
-                        ]
-                        },
-                        options: {
-                            onClick: brsClickEvent,
-                        title: {
-                            display: true,
-                            text: 'BRs com maior número de acidentes'
-                        }
-                        }
-                    });
+                    var backgroundColorBrs = ["#9b2948", "#ff7251","#ffca7b","#ffcd74","#ffedbf"];//https://www.color-hex.com/color-palette/1499
+                    var labelsBrs = ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br];
+                    var dataBrs = [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count];
                 }
                 else{
-                    var chartBrs = new Chart(document.getElementById("polar-chart"), {
-                        type: 'polarArea',
-                        data: {
-                        labels: ['BR-' + brsCount[0].br],
-                        datasets: [
-                            {
-                            label: "Quantidade:",
-                            backgroundColor: ["#9b2948"], //https://www.color-hex.com/color-palette/1499
-                            data: [brsCount[0].count]
-                            }
-                        ]
-                        },
-                        options: {
-                            onClick: brsClickEvent,
-                        title: {
-                            display: true,
-                            text: 'BRs com maior número de acidentes'
-                        }
-                        }
-                    });
+                    var backgroundColorBrs = ["#9b2948"];
+                    var labelsBrs = ['BR-' + brsCount[0].br];
+                    var dataBrs = [brsCount[0].count];
                 }
+                var chartBrs = new Chart(document.getElementById("polar-chart"), {
+                    type: 'polarArea',
+                    data: {
+                    labels: labelsBrs,
+                    datasets: [
+                        {
+                        label: "Quantidade:",
+                        backgroundColor: backgroundColorBrs, 
+                        data: dataBrs
+                        }
+                    ]
+                    },
+                    options: {
+                        onClick: brsClickEvent,
+                    title: {
+                        display: true,
+                        text: 'BRs com maior número de acidentes'
+                    }
+                    }
+                });
                 function brsClickEvent(event, array){
                     var choosen = array[0]._index;
                     var element = document.getElementById("brsAccident");
