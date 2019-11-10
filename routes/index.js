@@ -11,7 +11,7 @@ var host = "localhost:5435"
 var database = "postgiscwb" // database name
 var conString = "postgres://"+username+":"+password+"@"+host+"/"+database; // Your Database Connection
 
-const queryLimit = 12000;
+const queryLimit = 100000;
 
 // Set up your database query to display GeoJSON
 var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM public.accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
@@ -63,6 +63,11 @@ router.get('/data', function (req, res) {
 
 /* GET the map page */
 router.get('/map', async function (req, res) {
+    accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM public.accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
+    causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+    hoursQuery = "SELECT hora, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
+    statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
+    brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 5";
     doQueries(req, res);
 });
 
