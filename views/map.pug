@@ -351,14 +351,23 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 function weekChartClickEvent(event, array){
                     var choosen = array[0]._view.label; //we have the name of bar clicked, use to filter
                     var element = document.getElementById("weekDay");
-                    element.value = choosen;
-                    var elementIndex = array[0]._index;
-                    if(this.previousBackgroundColorWeekDay){
-                        this.data.datasets[0].backgroundColor[this.previousBackgroundPositionWeekDay] = this.previousBackgroundColorWeekDay; //Swap old selected to previous color
+                    
+                    if(element.value == choosen){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorWeekDay){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionWeekDay] = this.previousBackgroundColorWeekDay;
+                             element.value = null;
+                        }
                     }
-                    this.previousBackgroundColorWeekDay = this.data.datasets[0].backgroundColor[elementIndex];
-                    this.previousBackgroundPositionWeekDay = elementIndex;
-                    this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    else{
+                        element.value = choosen;
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorWeekDay){
+                          this.data.datasets[0].backgroundColor[this.previousBackgroundPositionWeekDay] = this.previousBackgroundColorWeekDay; //Swap old selected to previous color
+                        }
+                      this.previousBackgroundColorWeekDay = this.data.datasets[0].backgroundColor[elementIndex];
+                      this.previousBackgroundPositionWeekDay = elementIndex;
+                      this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
                     this.update();
                 }
         #chartYears
@@ -412,14 +421,25 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 function yearchartClickEvent(event, array){
                     var choosen = years[array[0]._index]; //index have info of Year index on array
                     var element = document.getElementById("yearAccident");
-                    element.value = choosen;
 
-                    var elementIndex = array[0]._index;
-                    if(this.previousBackgroundPositionYears){
-                        this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'gray'; //Swap old selected to previous color
+                    console.log(element.value);
+                    console.log(choosen);
+
+                    if(element.value == choosen){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'gray';
+                        element.value = null;
                     }
-                    this.previousBackgroundPositionYears = elementIndex;
-                    this.data.datasets[0].pointBackgroundColor[elementIndex] = 'red';
+
+                    else{
+                        element.value = choosen;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundPositionYears){
+                            this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'gray'; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundPositionYears = elementIndex;
+                        this.data.datasets[0].pointBackgroundColor[elementIndex] = 'red'; 
+                    }
                     this.update();
                 }
         #chartCauses
@@ -457,21 +477,30 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 function causesClickEvent(event, array){
                     var choosen = array[0]._index;
                     var element = document.getElementById("causesAccident");
-                    
-                    //Create new option for selected Cause
-                    var opt = document.createElement('option');
-                    opt.value = causesCount[choosen].causa_acidente;
-                    opt.innerHTML = causesCount[choosen].causa_acidente;
-                    element.appendChild(opt);
-                    element.value = causesCount[choosen].causa_acidente;
 
-                    var elementIndex = array[0]._index;
-                    if(this.previousBackgroundColorCauses){
-                        this.data.datasets[0].backgroundColor[this.previousBackgroundPositionCauses] = this.previousBackgroundColorCauses; //Swap old selected to previous color
+                    if(element.value == causesCount[choosen].causa_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorCauses){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionCauses] = this.previousBackgroundColorCauses;
+                             element.value = null;
+                        }
                     }
-                    this.previousBackgroundColorCauses = this.data.datasets[0].backgroundColor[elementIndex];
-                    this.previousBackgroundPositionCauses = elementIndex;
-                    this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    
+                    else{
+                        //Create new option for selected Cause
+                        var opt = document.createElement('option');
+                        opt.value = causesCount[choosen].causa_acidente;
+                        opt.innerHTML = causesCount[choosen].causa_acidente;
+                        element.appendChild(opt);
+                        element.value = causesCount[choosen].causa_acidente;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorCauses){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionCauses] = this.previousBackgroundColorCauses; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundColorCauses = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionCauses = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
                     this.update();
                 }
         #chartHours
@@ -523,20 +552,30 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     var choosen = array[0]._index;
                     var element = document.getElementById("hoursAccident");
 
-                    //Create new option for selected Hour
-                    var opt = document.createElement('option');
-                    opt.value = hoursCount[choosen].hora;
-                    opt.innerHTML = hoursCount[choosen].hora;
-                    element.appendChild(opt);
-                    element.value = hoursCount[choosen].hora;
-                    
-                    var elementIndex = array[0]._index;
-                    if(this.previousBackgroundColorHours){
-                        this.data.datasets[0].backgroundColor[this.previousBackgroundPositionHours] = this.previousBackgroundColorHours; //Swap old selected to previous color
+
+                    if(element.value == hoursCount[choosen].hora){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorHours){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionHours] = this.previousBackgroundColorHours;
+                             element.value = null;
+                        }
                     }
-                    this.previousBackgroundColorHours = this.data.datasets[0].backgroundColor[elementIndex];
-                    this.previousBackgroundPositionHours = elementIndex;
-                    this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+
+                    else{
+                        //Create new option for selected Hour
+                        var opt = document.createElement('option');
+                        opt.value = hoursCount[choosen].hora;
+                        opt.innerHTML = hoursCount[choosen].hora;
+                        element.appendChild(opt);
+                        element.value = hoursCount[choosen].hora;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorHours){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionHours] = this.previousBackgroundColorHours; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundColorHours = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionHours = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
                     this.update();
                 }
             #chartBrs
@@ -577,21 +616,30 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 function brsClickEvent(event, array){
                     var choosen = array[0]._index;
                     var element = document.getElementById("brsAccident");
-                    
-                    //Create new option for selected BR
-                    var opt = document.createElement('option');
-                    opt.value = brsCount[choosen].br;
-                    opt.innerHTML = brsCount[choosen].br;
-                    element.appendChild(opt);
-                    element.value = brsCount[choosen].br;
 
-                    var elementIndex = array[0]._index;
-                    if(this.previousBackgroundColorBrs){
-                        this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs; //Swap old selected to previous color
+                    if(element.value == brsCount[choosen].br){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorBrs){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs;
+                             element.value = null;
+                        }
                     }
-                    this.previousBackgroundColorBrs = this.data.datasets[0].backgroundColor[elementIndex];
-                    this.previousBackgroundPositionBrs = elementIndex;
-                    this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    
+                    else{
+                        //Create new option for selected BR
+                        var opt = document.createElement('option');
+                        opt.value = brsCount[choosen].br;
+                        opt.innerHTML = brsCount[choosen].br;
+                        element.appendChild(opt);
+                        element.value = brsCount[choosen].br;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorBrs){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundColorBrs = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionBrs = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
                     this.update();
                 }
         
