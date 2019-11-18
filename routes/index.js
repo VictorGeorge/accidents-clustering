@@ -17,9 +17,9 @@ const queryLimit = 100000;
 var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana)) As properties FROM public.accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
 
 //Get the 5 most common causes of accidents
-var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
 var causesQueryPrefix = "SELECT causa_acidente, COUNT(*) FROM public.accidents";
-var causesQuerySuffix = " GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+var causesQuerySuffix = " GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
 
 //Get the 5 most common hours of accidents
 var hoursQuery = "SELECT hora, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
@@ -32,9 +32,9 @@ var statesQueryPrefix = "SELECT uf, count(*) numero FROM public.accidents";
 var statesQuerySuffix = " GROUP BY uf ORDER BY numero DESC LIMIT 10";
 
 //Get the 10 Br's with most accidents
-var brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 5";
+var brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 10";
 var brsQueryPrefix = "SELECT br, COUNT(*) FROM public.accidents";
-var brsQuerySuffix = " GROUP BY br ORDER BY count(*) DESC LIMIT 5";
+var brsQuerySuffix = " GROUP BY br ORDER BY count(*) DESC LIMIT 10";
 
 var mainQueryPrefix = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana)) As properties FROM accidents  As lg ";
 var mainQuerySuffix = ") As f) As fc";
@@ -64,10 +64,10 @@ router.get('/data', function (req, res) {
 /* GET the map page */
 router.get('/map', async function (req, res) {
     accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM public.accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
-    causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 5";
+    causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
     hoursQuery = "SELECT hora, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
     statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
-    brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 5";
+    brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 10";
     doQueries(req, res);
 });
 
