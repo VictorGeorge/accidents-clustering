@@ -381,17 +381,20 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         #chartYears
             canvas(id="mixed-chart")
             script.
-                var myData = !{JSON.stringify(jsonData)};
-                var myDataFeatures = myData.features;
-                const yearDataGoes = 2018;
-                const yearStarted = 2007;
-                var accidentsPerYear = new Array(yearDataGoes - yearStarted).fill(0);
-                var years = ['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018']
-                for(var i = 0; i < myDataFeatures.length; i++) {
-                    var obj = myDataFeatures[i];
-                    accidentsPerYear[yearDataGoes - obj.properties.f5]++;
+                var myYears = !{JSON.stringify(yearsData)};
+                var accidentsPerYear = myYears.rows;
+                console.log(myYears);
+                if(myYears.rowCount > 1){ //If not, it's only one year and we don't show it
+                    var dataYears = [accidentsPerYear[0].count, accidentsPerYear[1].count, accidentsPerYear[2].count, accidentsPerYear[3].count, accidentsPerYear[4].count, accidentsPerYear[5].count,accidentsPerYear[6].count, accidentsPerYear[7].count, accidentsPerYear[8].count, accidentsPerYear[9].count, accidentsPerYear[10].count, accidentsPerYear[11].count];
+                    var years = [accidentsPerYear[0].ano, accidentsPerYear[1].ano, accidentsPerYear[2].ano, accidentsPerYear[3].ano, accidentsPerYear[4].ano, accidentsPerYear[5].ano,accidentsPerYear[6].ano, accidentsPerYear[7].ano, accidentsPerYear[8].ano, accidentsPerYear[9].ano, accidentsPerYear[10].ano, accidentsPerYear[11].ano];
                 }
-                //console.log(accidentsPerYear);
+                else{
+                    const yearStarted = 2007;
+                    var dataYears = new Array(11).fill(0);
+                    var hasDataPos = accidentsPerYear[0].ano - yearStarted;
+                    var years = ['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018'];
+                    dataYears[hasDataPos] = accidentsPerYear[0].count;
+                }
                 var line_chart = new Chart(document.getElementById("mixed-chart"), {
                     type: 'line',
                     data: {
@@ -401,9 +404,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         label: "Quantidade de acidentes",
                         borderColor: "#3e95cd",
                         fill:false,
-                        data: [accidentsPerYear[11], accidentsPerYear[10], accidentsPerYear[9], accidentsPerYear[8], accidentsPerYear[7], accidentsPerYear[6],
-                        accidentsPerYear[5], accidentsPerYear[4], accidentsPerYear[3], accidentsPerYear[2], accidentsPerYear[1], accidentsPerYear[0]],
-                        pointBackgroundColor: ["gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray", "gray"]
+                        data: dataYears,
+                        pointBackgroundColor: ["red", "red", "red", "red", "red", "red", "red", "red", "red", "red", "red", "red"]
                         }
                     ]
                     },
@@ -434,7 +436,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     console.log(choosen);
 
                     if(element.value == choosen){ //If user selects a filter and diselects it we take off gray and diselect the filter
-                        this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'gray';
+                        this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'red';
                         element.value = null;
                     }
 
@@ -443,10 +445,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
 
                         var elementIndex = array[0]._index;
                         if(this.previousBackgroundPositionYears){
-                            this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'gray'; //Swap old selected to previous color
+                            this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'red'; //Swap old selected to previous color
                         }
                         this.previousBackgroundPositionYears = elementIndex;
-                        this.data.datasets[0].pointBackgroundColor[elementIndex] = 'red'; 
+                        this.data.datasets[0].pointBackgroundColor[elementIndex] = 'gray'; 
                     }
                     this.update();
                 }

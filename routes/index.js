@@ -16,6 +16,11 @@ const queryLimit = 100000;
 // Set up your database query to display GeoJSON
 var accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana)) As properties FROM public.accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
 
+//Get the number of accidents throught the years
+var yearQuery = "SELECT ano, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY ano ORDER BY ano";
+var yearQueryPrefix = "SELECT ano, COUNT(*) FROM public.accidents";
+var yearQuerySuffix = " GROUP BY ano ORDER BY ano";
+
 //Get the 5 most common causes of accidents
 var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
 var causesQueryPrefix = "SELECT causa_acidente, COUNT(*) FROM public.accidents";
@@ -69,11 +74,12 @@ router.get('/data', function (req, res) {
 /* GET the map page */
 router.get('/map', async function (req, res) {
     accidentsQuery = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana, ano, br)) As properties FROM public.accidents As lg WHERE lg.ano = \'" + 2018 + "\' LIMIT " + queryLimit + ") As f) As fc";
-    causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
-    hoursQuery = "SELECT hora, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
-    statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
-    brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 10";
-    classQuery = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY classificacao_acidente ORDER BY count(*) DESC LIMIT 3";
+    yearQuery = "SELECT ano, COUNT(*) FROM public.accidents GROUP BY ano ORDER BY ano";
+    causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
+    hoursQuery = "SELECT hora, COUNT(*) FROM public.accidents GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
+    //statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
+    brsQuery = "SELECT br, COUNT(*) FROM public.accidents GROUP BY br ORDER BY count(*) DESC LIMIT 10";
+    classQuery = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents GROUP BY classificacao_acidente ORDER BY count(*) DESC LIMIT 3";
     doQueries(req, res);
 });
 
@@ -84,9 +90,11 @@ async function doQueries(req, res) {
     console.log(accidentsQuery);
     var resultQuery = await client.query(accidentsQuery);
     var data = resultQuery.rows[0].row_to_json // Save the JSON as variable data
+    const resultYear = await client.query(yearQuery);
+    console.log(yearQuery);
     const resultCauses = await client.query(causesQuery);
     const resultHours = await client.query(hoursQuery);
-    const resultStates = await client.query(statesQuery);
+    //const resultStates = await client.query(statesQuery);
     const resultBrs = await client.query(brsQuery);
     const resultClass = await client.query(classQuery);
 
@@ -94,9 +102,10 @@ async function doQueries(req, res) {
     await res.render('map', {
         title: "Accidents API", // Give a title to our page
         jsonData: data, // Pass data to the View
+        yearsData: resultYear,
         causesData: resultCauses,
         hoursData: resultHours,
-        statesData: resultStates,
+        //statesData: resultStates,
         brsData: resultBrs,
         classData: resultClass
     });
@@ -185,9 +194,10 @@ router.get('/filter*', async function (req, res) {
     filterString = filterString.concat(filters, mainQuerySuffix);
     accidentsQuery = filterString;
 
+    yearQuery = yearQueryPrefix + filtersSelects + yearQuerySuffix;
     causesQuery = causesQueryPrefix + filtersSelects + causesQuerySuffix;
     hoursQuery = hoursQueryPrefix + filtersSelects + hoursQuerySuffix;
-    statesQuery = statesQueryPrefix + filtersSelects + statesQuerySuffix;
+    //statesQuery = statesQueryPrefix + filtersSelects + statesQuerySuffix;
     brsQuery = brsQueryPrefix + filtersSelects + brsQuerySuffix;
     classQuery = classQueryPrefix + filtersSelects + classQuerySuffix;
     doQueries(req, res);
