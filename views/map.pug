@@ -35,6 +35,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         var previousBackgroundPositionHours;
         var previousBackgroundColorBrs;
         var previousBackgroundPositionBrs;
+        var previousBackgroundColorClass;
+        var previousBackgroundPositionClass;
         var geojson,
             metadata,
             geojsonPath = 'exemploFiltro.geojson',
@@ -270,6 +272,12 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='4') 4
         select(name='brsAccident' id='brsAccident' hidden)
             option(disabled='', selected='', value='') Br's
+        select(name='classAccident' id='classAccident' hidden)
+            option(disabled='', selected='', value='') Ano
+            option(value='3') 3
+            option(value='5') 5
+            option(value='1') 1
+            option(value='1') 6
         input(type='submit', class="submitButton" value='Filtrar')
     #charts 
         #chartWeekDay
@@ -642,6 +650,94 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                     this.update();
                 }
+            #chartDeaths
+                canvas(id="bar-chart-horizontal-classification")
+                script.
+                    var classAccidents = !{JSON.stringify(classData)};               
+                    var classCount = classAccidents.rows;
+                    var classColor=[];
+                    var classLabel=[];
+
+                    classAccidents.rows.forEach(function(entry, index) { //We receive class as number, we converte it back here
+                        if(entry.classificacao_acidente == 5){
+                            classLabel.push('Sem Vítimas'); 
+                            classColor.push("#6cc0e5");
+                        }
+                        else if(entry.classificacao_acidente == 3){
+                            classLabel.push('Com Vítimas Feridas'); 
+                            classColor.push("#fbc93d");
+                        }
+                        else if(entry.classificacao_acidente == 1){
+                            classLabel.push('Com Vítimas Fatais'); 
+                            classColor.push("#fb4f4f");
+                        }
+                        else{
+                            classLabel.push('Ignorado');
+                            classColor.push("#CCC");
+                        }
+                    });
+
+                    if(classAccidents.rowCount > 1){
+                        var backgroundColorClass = classColor;
+                        var dataClass = [classCount[0].count, classCount[1].count, classCount[2].count];
+                    }
+                    else{
+                        var backgroundColorClass = ["#fbc93d"];
+                        var dataClass = [classCount[0].count];
+                    }
+
+                    var barchartClass = new Chart(document.getElementById("bar-chart-horizontal-classification"), {
+                        type: 'horizontalBar',
+                        data: {
+                        labels: classLabel,
+                        datasets: [{
+                            label: "Quantidade",
+                            backgroundColor: backgroundColorClass,
+                            data: dataClass
+                        }]
+                        },
+                        options: {
+                            onClick: classClickEvent,
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    min: 0 // Edit the value according to what you need
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true
+                            }]
+                        },
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Classificação dos Acidentes'
+                        }
+                        }
+                    });
+                    function classClickEvent(event, array){
+                        var choosen = array[0]._index;
+                        var element = document.getElementById("classAccident");
+
+                        if(element.value == classCount[choosen].classificacao_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                            if(this.previousBackgroundColorClass){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionClass] = this.previousBackgroundColorClass;
+                                element.value = null;
+                            }
+                        }
+
+                        else{
+                            element.value = classCount[choosen].classificacao_acidente;
+                            var elementIndex = array[0]._index;
+                            if(this.previousBackgroundColorClass){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionClass] = this.previousBackgroundColorClass; //Swap old selected to previous color
+                            }
+                            this.previousBackgroundColorClass = this.data.datasets[0].backgroundColor[elementIndex];
+                            this.previousBackgroundPositionClass = elementIndex;
+                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                        }
+                        this.update();
+                    }
         
 
                 
