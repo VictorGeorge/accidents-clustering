@@ -458,7 +458,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 var causesAccidents = !{JSON.stringify(causesData)};                
                 var causesCount = causesAccidents.rows;
                 if(causesAccidents.rowCount > 1){
-                    var backgroundColorCauses = ["#134249", "#1C5E68", "#278593", "#38938D", "#41ADA6","#AF4949","#FF6B6B", "#A89848", "#DDC85F", "#FFE66D"]; //Palette Causes
+                    var backgroundColorCauses = ["#303F9F", "#ed0647", "#4CAF50", "#f3ba09", "#ded4af","#fd5a18","#0893dd", "#795548", "#fcc8ec", "#945b8c"]; //Palette Causes
                     var labelsCauses = [causesCount[0].causa_acidente, causesCount[1].causa_acidente, causesCount[2].causa_acidente, causesCount[3].causa_acidente, causesCount[4].causa_acidente, causesCount[5].causa_acidente, causesCount[6].causa_acidente, causesCount[7].causa_acidente, causesCount[8].causa_acidente, causesCount[9].causa_acidente];
                     var dataCauses = [causesCount[0].count,causesCount[1].count,causesCount[2].count,causesCount[3].count,causesCount[4].count, causesCount[5].count,causesCount[6].count,causesCount[7].count,causesCount[8].count,causesCount[9].count];
                 }
@@ -519,7 +519,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 var hoursAccidents = !{JSON.stringify(hoursData)};               
                 var hoursCount = hoursAccidents.rows;
                 if(hoursAccidents.rowCount > 1){
-                    var backgroundColorHours = ["#edee50", "#69f49c","#aec5ec","#d55fe3","#257aa3"];
+                    var backgroundColorHours = ["#257aa3", "#d55fe3","#aec5ec","#69f49c","#edee50"];
                     var labelsHours = [hoursCount[0].hora+':00-'+hoursCount[0].hora+':59', hoursCount[1].hora+':00-'+hoursCount[1].hora+':59', hoursCount[2].hora+':00-'+hoursCount[2].hora+':59',
                     hoursCount[3].hora+':00-'+hoursCount[3].hora+':59', hoursCount[4].hora+':00-'+hoursCount[4].hora+':59'];
                     var dataHours = [hoursCount[0].count,hoursCount[1].count,hoursCount[2].count,hoursCount[3].count,hoursCount[4].count];
@@ -594,7 +594,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 var brsAccidents = !{JSON.stringify(brsData)};               
                 var brsCount = brsAccidents.rows;
                 if(brsAccidents.rowCount > 1){
-                    var backgroundColorBrs = ["#9b2948", "#ff7251","#ffca7b","#ffcd74","#ffedbf", "yellow", "orange", "blue", "gold", "brown"];//https://www.color-hex.com/color-palette/1499 Palette Brs
+                    var backgroundColorBrs = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
                     var labelsBrs = ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br, 'BR-' + brsCount[5].br, 'BR-' + brsCount[6].br, 'BR-' + brsCount[7].br, 'BR-' + brsCount[8].br, 'BR-' + brsCount[9].br];
                     var dataBrs = [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count, brsCount[5].count, brsCount[6].count, brsCount[7].count, brsCount[8].count, brsCount[9].count];
                 }
