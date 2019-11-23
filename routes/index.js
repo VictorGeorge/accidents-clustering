@@ -21,6 +21,11 @@ var yearQuery = "SELECT ano, COUNT(*) FROM public.accidents WHERE ano = 2018 GRO
 var yearQueryPrefix = "SELECT ano, COUNT(*) FROM public.accidents";
 var yearQuerySuffix = " GROUP BY ano ORDER BY ano";
 
+//Get the number of accidents throught the years
+var weekQuery = "SELECT dia_semana, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY dia_semana ORDER BY dia_semana";
+var weekQueryPrefix = "SELECT dia_semana, COUNT(*) FROM public.accidents";
+var weekQuerySuffix = " GROUP BY dia_semana ORDER BY dia_semana";
+
 //Get the 5 most common causes of accidents
 var causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
 var causesQueryPrefix = "SELECT causa_acidente, COUNT(*) FROM public.accidents";
@@ -80,6 +85,7 @@ router.get('/map', async function (req, res) {
     //statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
     brsQuery = "SELECT br, COUNT(*) FROM public.accidents GROUP BY br ORDER BY count(*) DESC LIMIT 10";
     classQuery = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents GROUP BY classificacao_acidente ORDER BY count(*) DESC LIMIT 3";
+    weekQuery = "SELECT dia_semana, COUNT(*) FROM public.accidents GROUP BY dia_semana ORDER BY dia_semana";
     doQueries(req, res);
 });
 
@@ -91,12 +97,12 @@ async function doQueries(req, res) {
     var resultQuery = await client.query(accidentsQuery);
     var data = resultQuery.rows[0].row_to_json // Save the JSON as variable data
     const resultYear = await client.query(yearQuery);
-    console.log(yearQuery);
     const resultCauses = await client.query(causesQuery);
     const resultHours = await client.query(hoursQuery);
     //const resultStates = await client.query(statesQuery);
     const resultBrs = await client.query(brsQuery);
     const resultClass = await client.query(classQuery);
+    const resultWeek = await client.query(weekQuery);    
 
     await client.end();
     await res.render('map', {
@@ -107,7 +113,8 @@ async function doQueries(req, res) {
         hoursData: resultHours,
         //statesData: resultStates,
         brsData: resultBrs,
-        classData: resultClass
+        classData: resultClass,
+        weekData: resultWeek
     });
 }
 
@@ -121,7 +128,7 @@ router.get('/filter*', async function (req, res) {
     var causesAccident = req.query.causesAccident;
     var hoursAccident = req.query.hoursAccident;
     var brsAccident = req.query.brsAccident;
-    var classAccident = req.query.classAccident;
+    var classAccident = req.query.classAccident;   
     let yearFilterString;
     //TODO: 1 metodo pra cada filtro, que faz a query e retorna, e um pras localizações msm, que tem que ter todos os filtros na query async await talvez?
     if (yearAccident != undefined) {
@@ -200,6 +207,7 @@ router.get('/filter*', async function (req, res) {
     //statesQuery = statesQueryPrefix + filtersSelects + statesQuerySuffix;
     brsQuery = brsQueryPrefix + filtersSelects + brsQuerySuffix;
     classQuery = classQueryPrefix + filtersSelects + classQuerySuffix;
+    weekQuery = weekQueryPrefix + filtersSelects + weekQuerySuffix;
     doQueries(req, res);
 });
 

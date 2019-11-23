@@ -12,7 +12,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
     script.
         var myData = !{JSON.stringify(jsonData)};
         "use strict"
-        //console.log(myData);
         var occurrence = function (array) {
             var result = {};
             if (array instanceof Array) { // Check if input is array.
@@ -283,49 +282,43 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         #chartWeekDay
             canvas(id="bar-chart")
             script.
-                var myData = !{JSON.stringify(jsonData)};
-                var myDataFeatures = myData.features;
-                var segunda = 0;
-                var terca = 0;
-                var quarta = 0;
-                var quinta = 0;
-                var sexta = 0;
-                var sabado = 0;
-                var domingo = 0;
-                for(var i = 0; i < myDataFeatures.length; i++) {
-                    var obj = myDataFeatures[i];
-
-                    switch(obj.properties.f4) {
+                var weekAccidents = !{JSON.stringify(weekData)};  
+                var weekDistribution = weekAccidents.rows;
+                var weekArray = [];
+                var backgroundColorWeek = ["#fdb94e", "#f9a852","#f69653","#f38654","#f07654", "#ed6856", "#ef5956"];
+                weekDistribution.forEach(function(entry, index) { //We have to put weekdays in order
+                    switch(entry.dia_semana) {
                         case "Segunda": {
-                            segunda++;
+                            weekArray[0] = entry.count;
                             break;
                         }
                         case "Terça": {
-                            terca++;
+                            weekArray[1] = entry.count;
                             break;
                         }
                         case "Quarta": {
-                            quarta++;
+                            weekArray[2] = entry.count;
                             break;
                         }
                         case "Quinta": {
-                            quinta++;
+                            weekArray[3] = entry.count;
                             break;
                         }
                         case "Sexta": {
-                            sexta++;
+                            weekArray[4] = entry.count;
                             break;
                         }
                         case "Sábado": {
-                            sabado++;
+                            weekArray[5] = entry.count;
                             break;
                         }
                         case "Domingo": {
-                            domingo++;
+                            weekArray[6] = entry.count;
                             break;
                         }
                     }
-                }
+                });
+                    
                 var bar_chart = new Chart(document.getElementById("bar-chart"), {
                     type: 'bar',
                     data: {
@@ -333,8 +326,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     datasets: [
                         {
                         label: "Quantidade de acidentes",
-                        backgroundColor: ["#fdb94e", "#f9a852","#f69653","#f38654","#f07654", "#ed6856", "#ef5956"],
-                        data: [segunda,terca,quarta,quinta,sexta, sabado, domingo]
+                        backgroundColor: backgroundColorWeek,
+                        data: weekArray
                         }
                     ]
                     },
@@ -383,7 +376,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             script.
                 var myYears = !{JSON.stringify(yearsData)};
                 var accidentsPerYear = myYears.rows;
-                console.log(myYears);
                 if(myYears.rowCount > 1){ //If not, it's only one year and we don't show it
                     var dataYears = [accidentsPerYear[0].count, accidentsPerYear[1].count, accidentsPerYear[2].count, accidentsPerYear[3].count, accidentsPerYear[4].count, accidentsPerYear[5].count,accidentsPerYear[6].count, accidentsPerYear[7].count, accidentsPerYear[8].count, accidentsPerYear[9].count, accidentsPerYear[10].count, accidentsPerYear[11].count];
                     var years = [accidentsPerYear[0].ano, accidentsPerYear[1].ano, accidentsPerYear[2].ano, accidentsPerYear[3].ano, accidentsPerYear[4].ano, accidentsPerYear[5].ano,accidentsPerYear[6].ano, accidentsPerYear[7].ano, accidentsPerYear[8].ano, accidentsPerYear[9].ano, accidentsPerYear[10].ano, accidentsPerYear[11].ano];
@@ -431,9 +423,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 function yearchartClickEvent(event, array){
                     var choosen = years[array[0]._index]; //index have info of Year index on array
                     var element = document.getElementById("yearAccident");
-
-                    console.log(element.value);
-                    console.log(choosen);
 
                     if(element.value == choosen){ //If user selects a filter and diselects it we take off gray and diselect the filter
                         this.data.datasets[0].pointBackgroundColor[this.previousBackgroundPositionYears] = 'red';
@@ -655,7 +644,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             #chartDeaths
                 canvas(id="bar-chart-horizontal-classification")
                 script.
-                    var classAccidents = !{JSON.stringify(classData)};               
+                    var classAccidents = !{JSON.stringify(classData)};             
                     var classCount = classAccidents.rows;
                     var classColor=[];
                     var classLabel=[];
