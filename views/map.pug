@@ -36,6 +36,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         var previousBackgroundPositionBrs;
         var previousBackgroundColorClass;
         var previousBackgroundPositionClass;
+        var previousBackgroundColorStates;
+        var previousBackgroundPositionStates;
         var geojson,
             metadata,
             geojsonPath = 'exemploFiltro.geojson',
@@ -277,6 +279,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='5') 5
             option(value='1') 1
             option(value='1') 6
+        select(name='statesAccident' id='statesAccident' hidden)
+            option(disabled='', selected='', value='') States
         input(type='submit', class="submitButton" value='Filtrar')
     #charts 
         #chartWeekDay
@@ -578,69 +582,149 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     this.update();
                 }
             #chartBrs
-            canvas(id="polar-chart")
-            script.
-                var brsAccidents = !{JSON.stringify(brsData)};               
-                var brsCount = brsAccidents.rows;
-                if(brsAccidents.rowCount > 1){
-                    var backgroundColorBrs = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
-                    var labelsBrs = ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br, 'BR-' + brsCount[5].br, 'BR-' + brsCount[6].br, 'BR-' + brsCount[7].br, 'BR-' + brsCount[8].br, 'BR-' + brsCount[9].br];
-                    var dataBrs = [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count, brsCount[5].count, brsCount[6].count, brsCount[7].count, brsCount[8].count, brsCount[9].count];
-                }
-                else{
-                    var backgroundColorBrs = ["#9b2948"];
-                    var labelsBrs = ['BR-' + brsCount[0].br];
-                    var dataBrs = [brsCount[0].count];
-                }
-                var chartBrs = new Chart(document.getElementById("polar-chart"), {
-                    type: 'polarArea',
-                    data: {
-                    labels: labelsBrs,
-                    datasets: [
-                        {
-                        label: "Quantidade:",
-                        backgroundColor: backgroundColorBrs, 
-                        data: dataBrs
-                        }
-                    ]
-                    },
-                    options: {
-                        onClick: brsClickEvent,
-                    title: {
-                        display: true,
-                        text: 'BRs com maior número de acidentes'
+                canvas(id="polar-chart")
+                script.
+                    var brsAccidents = !{JSON.stringify(brsData)};               
+                    var brsCount = brsAccidents.rows;
+                    if(brsAccidents.rowCount > 1){
+                        var backgroundColorBrs = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
+                        var labelsBrs = ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br, 'BR-' + brsCount[5].br, 'BR-' + brsCount[6].br, 'BR-' + brsCount[7].br, 'BR-' + brsCount[8].br, 'BR-' + brsCount[9].br];
+                        var dataBrs = [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count, brsCount[5].count, brsCount[6].count, brsCount[7].count, brsCount[8].count, brsCount[9].count];
                     }
-                    }
-                });
-                function brsClickEvent(event, array){
-                    var choosen = array[0]._index;
-                    var element = document.getElementById("brsAccident");
-
-                    if(element.value == brsCount[choosen].br){ //If user selects a filter and diselects it we take off gray and diselect the filter
-                        if(this.previousBackgroundColorBrs){
-                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs;
-                             element.value = null;
-                        }
-                    }
-                    
                     else{
-                        //Create new option for selected BR
-                        var opt = document.createElement('option');
-                        opt.value = brsCount[choosen].br;
-                        opt.innerHTML = brsCount[choosen].br;
-                        element.appendChild(opt);
-                        element.value = brsCount[choosen].br;
-
-                        var elementIndex = array[0]._index;
-                        if(this.previousBackgroundColorBrs){
-                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs; //Swap old selected to previous color
-                        }
-                        this.previousBackgroundColorBrs = this.data.datasets[0].backgroundColor[elementIndex];
-                        this.previousBackgroundPositionBrs = elementIndex;
-                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                        var backgroundColorBrs = ["#9b2948"];
+                        var labelsBrs = ['BR-' + brsCount[0].br];
+                        var dataBrs = [brsCount[0].count];
                     }
-                    this.update();
-                }
+                    var chartBrs = new Chart(document.getElementById("polar-chart"), {
+                        type: 'polarArea',
+                        data: {
+                        labels: labelsBrs,
+                        datasets: [
+                            {
+                            label: "Quantidade:",
+                            backgroundColor: backgroundColorBrs, 
+                            data: dataBrs
+                            }
+                        ]
+                        },
+                        options: {
+                            onClick: brsClickEvent,
+                        title: {
+                            display: true,
+                            text: 'BRs com maior número de acidentes'
+                        }
+                        }
+                    });
+                    function brsClickEvent(event, array){
+                        var choosen = array[0]._index;
+                        var element = document.getElementById("brsAccident");
+
+                        if(element.value == brsCount[choosen].br){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                            if(this.previousBackgroundColorBrs){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs;
+                                element.value = null;
+                            }
+                        }
+                        
+                        else{
+                            //Create new option for selected BR
+                            var opt = document.createElement('option');
+                            opt.value = brsCount[choosen].br;
+                            opt.innerHTML = brsCount[choosen].br;
+                            element.appendChild(opt);
+                            element.value = brsCount[choosen].br;
+
+                            var elementIndex = array[0]._index;
+                            if(this.previousBackgroundColorBrs){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs; //Swap old selected to previous color
+                            }
+                            this.previousBackgroundColorBrs = this.data.datasets[0].backgroundColor[elementIndex];
+                            this.previousBackgroundPositionBrs = elementIndex;
+                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                        }
+                        this.update();
+                    }
+            #chartStates
+                canvas(id="bar-chart-states")
+                script.
+                    var statesAccidents = !{JSON.stringify(statesData)};             
+                    var statesCount = statesAccidents.rows;
+                    
+                    if(statesAccidents.rowCount > 1){
+                        var backgroundColorStates = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
+                        var labelsStates = [statesCount[0].uf, statesCount[1].uf, statesCount[2].uf, statesCount[3].uf, statesCount[4].uf, statesCount[5].uf, statesCount[6].uf, statesCount[7].uf, statesCount[8].uf, statesCount[9].uf];
+                        var dataStates = [statesCount[0].count, statesCount[1].count, statesCount[2].count, statesCount[3].count, statesCount[4].count, statesCount[5].count, statesCount[6].count, statesCount[7].count, statesCount[8].count, statesCount[9].count];
+                    }
+                    else{
+                        var backgroundColorStates = ["#9b2948"];
+                        var labelsStates = [statesCount[0].uf];
+                        var dataStates = [statesCount[0].count];
+                    }
+
+                    var bar_chart_states = new Chart(document.getElementById("bar-chart-states"), {
+                        type: 'bar',
+                        data: {
+                        labels: labelsStates,
+                        datasets: [
+                            {
+                            label: "Quantidade de acidentes",
+                            backgroundColor: backgroundColorStates,
+                            data: dataStates
+                            }
+                        ]
+                        },
+                        options: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: 'Estados com maior número de acidentes'
+                            },
+                            maintainAspectRatio: false,
+                            onClick: statesClickEvent,
+                            responsive: true,
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero:true
+                                    }
+                                }]
+                            }
+                        }
+                    });
+
+                    function statesClickEvent(event, array){
+                        var choosen = array[0]._index;
+                        var element = document.getElementById("statesAccident");
+
+                        console.log(element);
+                        console.log(statesCount[choosen].uf);
+
+                        if(element.value == statesCount[choosen].uf){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                            if(this.previousBackgroundColorStates){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates;
+                                element.value = null;
+                            }
+                        }
+
+                        else{
+                             //Create new option for state
+                            var opt = document.createElement('option');
+                            opt.value = statesCount[choosen].uf;
+                            opt.innerHTML = statesCount[choosen].uf;
+                            element.appendChild(opt);
+                            element.value = statesCount[choosen].uf;
+
+                            var elementIndex = array[0]._index;
+                            if(this.previousBackgroundColorStates){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates; //Swap old selected to previous color
+                            }
+                            this.previousBackgroundColorStates = this.data.datasets[0].backgroundColor[elementIndex];
+                            this.previousBackgroundPositionStates = elementIndex;
+                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                        }
+                        this.update();
+                    }
             #chartDeaths
                 canvas(id="bar-chart-horizontal-classification")
                 script.

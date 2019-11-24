@@ -37,9 +37,9 @@ var hoursQueryPrefix = "SELECT hora, COUNT(*) FROM public.accidents";
 var hoursQuerySuffix = " GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
 
 //Get the 10 most common states
-var statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
-var statesQueryPrefix = "SELECT uf, count(*) numero FROM public.accidents";
-var statesQuerySuffix = " GROUP BY uf ORDER BY numero DESC LIMIT 10";
+var statesQuery = "SELECT uf, COUNT(*) FROM public.accidents GROUP BY uf ORDER BY count(*) DESC LIMIT 10";
+var statesQueryPrefix = "SELECT uf, COUNT(*) FROM public.accidents";
+var statesQuerySuffix = " GROUP BY uf ORDER BY count(*) DESC LIMIT 10";
 
 //Get the 10 Br's with most accidents
 var brsQuery = "SELECT br, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY br ORDER BY count(*) DESC LIMIT 10";
@@ -82,7 +82,7 @@ router.get('/map', async function (req, res) {
     yearQuery = "SELECT ano, COUNT(*) FROM public.accidents GROUP BY ano ORDER BY ano";
     causesQuery = "SELECT causa_acidente, COUNT(*) FROM public.accidents GROUP BY causa_acidente ORDER BY count(*) DESC LIMIT 10";
     hoursQuery = "SELECT hora, COUNT(*) FROM public.accidents GROUP BY hora ORDER BY count(*) DESC LIMIT 5";
-    //statesQuery = "SELECT uf, count(*) numero FROM public.accidents WHERE ano BETWEEN 2007 AND 2017 GROUP BY uf ORDER BY numero DESC LIMIT 10";
+    statesQuery = "SELECT uf, COUNT(*) FROM public.accidents GROUP BY uf ORDER BY count(*) DESC LIMIT 10";
     brsQuery = "SELECT br, COUNT(*) FROM public.accidents GROUP BY br ORDER BY count(*) DESC LIMIT 10";
     classQuery = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents GROUP BY classificacao_acidente ORDER BY count(*) DESC LIMIT 3";
     weekQuery = "SELECT dia_semana, COUNT(*) FROM public.accidents GROUP BY dia_semana ORDER BY dia_semana";
@@ -103,6 +103,7 @@ async function doQueries(req, res) {
     const resultBrs = await client.query(brsQuery);
     const resultClass = await client.query(classQuery);
     const resultWeek = await client.query(weekQuery);    
+    const resultStates = await client.query(statesQuery); 
 
     await client.end();
     await res.render('map', {
@@ -114,7 +115,8 @@ async function doQueries(req, res) {
         //statesData: resultStates,
         brsData: resultBrs,
         classData: resultClass,
-        weekData: resultWeek
+        weekData: resultWeek,
+        statesData: resultStates
     });
 }
 
@@ -129,6 +131,7 @@ router.get('/filter*', async function (req, res) {
     var hoursAccident = req.query.hoursAccident;
     var brsAccident = req.query.brsAccident;
     var classAccident = req.query.classAccident;   
+    var statesAccident = req.query.statesAccident; 
     let yearFilterString;
     //TODO: 1 metodo pra cada filtro, que faz a query e retorna, e um pras localizações msm, que tem que ter todos os filtros na query async await talvez?
     if (yearAccident != undefined) {
@@ -197,6 +200,15 @@ router.get('/filter*', async function (req, res) {
             filtersSelects = filtersSelects.concat(classFilterString);
         }
     }
+    if (statesAccident != undefined) {
+        if (isRequestValid(statesAccident) === true) {
+            let statesFilterString = await statesFilter(statesAccident);
+            filters = filters.concat(statesFilterString);
+
+            statesFilterString = await statesFilterSelects(statesAccident);
+            filtersSelects = filtersSelects.concat(statesFilterString);
+        }
+    }
     var filterString = mainQueryPrefix;
     filterString = filterString.concat(filters, mainQuerySuffix);
     accidentsQuery = filterString;
@@ -208,6 +220,7 @@ router.get('/filter*', async function (req, res) {
     brsQuery = brsQueryPrefix + filtersSelects + brsQuerySuffix;
     classQuery = classQueryPrefix + filtersSelects + classQuerySuffix;
     weekQuery = weekQueryPrefix + filtersSelects + weekQuerySuffix;
+    statesQuery = statesQueryPrefix + filtersSelects + statesQuerySuffix;
     doQueries(req, res);
 });
 
@@ -247,6 +260,10 @@ async function classFilter(classification) {
     return " AND lg.classificacao_acidente = \'" + classification + "\'";
 }
 
+async function statesFilter(state) {
+    return " AND lg.uf = \'" + state + "\' ";
+}
+
 async function yearFilterSelects(yearAccident) {
     return " WHERE ano = " + yearAccident;
 }
@@ -269,5 +286,9 @@ async function hoursFilterSelects(hour) {
 
 async function classFilterSelects(classification) {
     return " AND classificacao_acidente = \'" + classification + "\' ";
+}
+
+async function statesFilterSelects(state) {
+    return " AND uf = \'" + state + "\' ";
 }
 
