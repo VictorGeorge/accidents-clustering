@@ -697,9 +697,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         var choosen = array[0]._index;
                         var element = document.getElementById("statesAccident");
 
-                        console.log(element);
-                        console.log(statesCount[choosen].uf);
-
                         if(element.value == statesCount[choosen].uf){ //If user selects a filter and diselects it we take off gray and diselect the filter
                             if(this.previousBackgroundColorStates){
                                 this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates;
