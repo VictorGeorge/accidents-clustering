@@ -51,6 +51,11 @@ var classQuery = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents 
 var classQueryPrefix = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents";
 var classQuerySuffix = " GROUP BY classificacao_acidente ORDER BY count(*) DESC LIMIT 3";
 
+//Get the 5 most common types of accidents
+var typesQuery = "SELECT tipo_acidente, COUNT(*) FROM public.accidents WHERE ano = 2018 GROUP BY tipo_acidente ORDER BY count(*) DESC LIMIT 5";
+var typesQueryPrefix = "SELECT tipo_acidente, COUNT(*) FROM public.accidents";
+var typesQuerySuffix = " GROUP BY tipo_acidente ORDER BY count(*) DESC LIMIT 5";
+
 var mainQueryPrefix = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, data_inversa, classificacao_acidente, dia_semana)) As properties FROM accidents  As lg ";
 var mainQuerySuffix = ") As f) As fc";
 
@@ -86,6 +91,7 @@ router.get('/map', async function (req, res) {
     brsQuery = "SELECT br, COUNT(*) FROM public.accidents GROUP BY br ORDER BY count(*) DESC LIMIT 10";
     classQuery = "SELECT classificacao_acidente, COUNT(*) FROM public.accidents GROUP BY classificacao_acidente ORDER BY count(*) DESC LIMIT 3";
     weekQuery = "SELECT dia_semana, COUNT(*) FROM public.accidents GROUP BY dia_semana ORDER BY dia_semana";
+    typesQuery = "SELECT tipo_acidente, COUNT(*) FROM public.accidents GROUP BY tipo_acidente ORDER BY count(*) DESC LIMIT 5";
     doQueries(req, res);
 });
 
@@ -104,6 +110,7 @@ async function doQueries(req, res) {
     const resultClass = await client.query(classQuery);
     const resultWeek = await client.query(weekQuery);    
     const resultStates = await client.query(statesQuery); 
+    const resultTypes = await client.query(typesQuery); 
 
     await client.end();
     await res.render('map', {
@@ -116,7 +123,8 @@ async function doQueries(req, res) {
         brsData: resultBrs,
         classData: resultClass,
         weekData: resultWeek,
-        statesData: resultStates
+        statesData: resultStates,
+        typesData: resultTypes
     });
 }
 
@@ -131,7 +139,8 @@ router.get('/filter*', async function (req, res) {
     var hoursAccident = req.query.hoursAccident;
     var brsAccident = req.query.brsAccident;
     var classAccident = req.query.classAccident;   
-    var statesAccident = req.query.statesAccident; 
+    var statesAccident = req.query.statesAccident;
+    var typesAccident = req.query.typesAccident;  
     let yearFilterString;
     //TODO: 1 metodo pra cada filtro, que faz a query e retorna, e um pras localizações msm, que tem que ter todos os filtros na query async await talvez?
     if (yearAccident != undefined) {
@@ -209,6 +218,16 @@ router.get('/filter*', async function (req, res) {
             filtersSelects = filtersSelects.concat(statesFilterString);
         }
     }
+    if (typesAccident != undefined) {
+        if (isRequestValid(typesAccident) === true) {
+            let typesFilterString = await typesFilter(typesAccident);
+            filters = filters.concat(typesFilterString);
+
+            typesFilterString = await typesFilterSelects(typesAccident);
+            filtersSelects = filtersSelects.concat(typesFilterString);
+        }
+    }
+
     var filterString = mainQueryPrefix;
     filterString = filterString.concat(filters, mainQuerySuffix);
     accidentsQuery = filterString;
@@ -221,6 +240,7 @@ router.get('/filter*', async function (req, res) {
     classQuery = classQueryPrefix + filtersSelects + classQuerySuffix;
     weekQuery = weekQueryPrefix + filtersSelects + weekQuerySuffix;
     statesQuery = statesQueryPrefix + filtersSelects + statesQuerySuffix;
+    typesQuery = typesQueryPrefix + filtersSelects + typesQuerySuffix;
     doQueries(req, res);
 });
 
@@ -264,6 +284,10 @@ async function statesFilter(state) {
     return " AND lg.uf = \'" + state + "\' ";
 }
 
+async function typesFilter(type) {
+    return " AND lg.tipo_acidente = \'" + type + "\' ";
+}
+
 async function yearFilterSelects(yearAccident) {
     return " WHERE ano = " + yearAccident;
 }
@@ -292,3 +316,6 @@ async function statesFilterSelects(state) {
     return " AND uf = \'" + state + "\' ";
 }
 
+async function typesFilterSelects(type) {
+    return " AND tipo_acidente = \'" + type + "\' ";
+}

@@ -38,6 +38,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
         var previousBackgroundPositionClass;
         var previousBackgroundColorStates;
         var previousBackgroundPositionStates;
+        var previousBackgroundColorTypes;
+        var previousBackgroundPositionTypes;        
         var geojson,
             metadata,
             geojsonPath = 'exemploFiltro.geojson',
@@ -281,6 +283,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='1') 6
         select(name='statesAccident' id='statesAccident' hidden)
             option(disabled='', selected='', value='') States
+        select(name='typesAccident' id='typesAccident' hidden)
+            option(disabled='', selected='', value='') Types
         input(type='submit', class="submitButton" value='Filtrar')
     #charts 
         #chartWeekDay
@@ -718,6 +722,73 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                             }
                             this.previousBackgroundColorStates = this.data.datasets[0].backgroundColor[elementIndex];
                             this.previousBackgroundPositionStates = elementIndex;
+                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                        }
+                        this.update();
+                    }
+            #chartTypes
+                canvas(id="doughnut-chart")
+                script.
+                    var typesAccidents = !{JSON.stringify(typesData)};             
+                    var typesCount = typesAccidents.rows;
+                    
+                    if(typesAccidents.rowCount > 1){
+                        var backgroundColorTypes = ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"];
+                        var labelsTypes = [typesCount[0].tipo_acidente, typesCount[1].tipo_acidente, typesCount[2].tipo_acidente, typesCount[3].tipo_acidente, typesCount[4].tipo_acidente];
+                        var dataStates = [typesCount[0].count, typesCount[1].count, typesCount[2].count, typesCount[3].count, typesCount[4].count];
+                    }
+                    else{
+                        var backgroundColorTypes = ["#9b2948"];
+                        var labelsTypes = [typesCount[0].tipo_acidente];
+                        var dataStates = [typesCount[0].count];
+                    }
+
+                    var typesChart = new Chart(document.getElementById("doughnut-chart"), {
+                        type: 'doughnut',
+                        data: {
+                        labels: labelsTypes,
+                        datasets: [
+                            {
+                            label: "Quantidade",
+                            backgroundColor: backgroundColorTypes,
+                            data: dataStates
+                            }
+                        ]
+                        },
+                        options: {
+                            onClick: typesClickEvent,
+                        title: {
+                            display: true,
+                            text: 'Tipos de acidente mais comuns'
+                        }
+                        }
+                    });
+
+                    function typesClickEvent(event, array){
+                        var choosen = array[0]._index;
+                        var element = document.getElementById("typesAccident");
+
+                        if(element.value == typesCount[choosen].tipo_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                            if(this.previousbackgroundColorTypes){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionTypes] = this.previousbackgroundColorTypes;
+                                element.value = null;
+                            }
+                        }
+
+                        else{
+                             //Create new option for state
+                            var opt = document.createElement('option');
+                            opt.value = typesCount[choosen].tipo_acidente;
+                            opt.innerHTML = typesCount[choosen].tipo_acidente;
+                            element.appendChild(opt);
+                            element.value = typesCount[choosen].tipo_acidente;
+
+                            var elementIndex = array[0]._index;
+                            if(this.previousbackgroundColorTypes){
+                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionTypes] = this.previousbackgroundColorTypes; //Swap old selected to previous color
+                            }
+                            this.previousbackgroundColorTypes = this.data.datasets[0].backgroundColor[elementIndex];
+                            this.previousBackgroundPositionTypes = elementIndex;
                             this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
                         }
                         this.update();
