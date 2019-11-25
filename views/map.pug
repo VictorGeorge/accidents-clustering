@@ -266,6 +266,8 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='2') 2
             option(value='3') 3
             option(value='4') 4
+        select(name='brsAccident' id='brsAccident' hidden)
+            option(disabled='', selected='', value='') Br's
         select(name='hoursAccident' id='hoursAccident' hidden)
             option(disabled='', selected='', value='') Horarios
             option(value='0') 0
@@ -273,8 +275,6 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(value='2') 2
             option(value='3') 3
             option(value='4') 4
-        select(name='brsAccident' id='brsAccident' hidden)
-            option(disabled='', selected='', value='') Br's
         select(name='classAccident' id='classAccident' hidden)
             option(disabled='', selected='', value='') Ano
             option(value='3') 3
@@ -341,6 +341,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     ]
                     },
                     options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
+                        },
                         legend: { display: false },
                         title: {
                             display: true,
@@ -411,6 +415,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     ]
                     },
                     options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
+                        },
                         legend: { display: false },
                         title: {
                             display: true,
@@ -475,6 +483,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }]
                     },
                     options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
+                        },
                         onClick: causesClickEvent,
                     title: {
                         display: true,
@@ -511,6 +523,74 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                     this.update();
                 }
+        #chartBrs
+            canvas(id="polar-chart")
+            script.
+                var brsAccidents = !{JSON.stringify(brsData)};               
+                var brsCount = brsAccidents.rows;
+                if(brsAccidents.rowCount > 1){
+                    var backgroundColorBrs = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
+                    var labelsBrs = ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br, 'BR-' + brsCount[5].br, 'BR-' + brsCount[6].br, 'BR-' + brsCount[7].br, 'BR-' + brsCount[8].br, 'BR-' + brsCount[9].br];
+                    var dataBrs = [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count, brsCount[5].count, brsCount[6].count, brsCount[7].count, brsCount[8].count, brsCount[9].count];
+                }
+                else{
+                    var backgroundColorBrs = ["#9b2948"];
+                    var labelsBrs = ['BR-' + brsCount[0].br];
+                    var dataBrs = [brsCount[0].count];
+                }
+                var chartBrs = new Chart(document.getElementById("polar-chart"), {
+                    type: 'polarArea',
+                    data: {
+                    labels: labelsBrs,
+                    datasets: [
+                        {
+                        label: "Quantidade:",
+                        backgroundColor: backgroundColorBrs, 
+                        data: dataBrs
+                        }
+                    ]
+                    },
+                    options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
+                        },
+                        onClick: brsClickEvent,
+                    title: {
+                        display: true,
+                        text: 'BRs com maior número de acidentes'
+                    }
+                    }
+                });
+                function brsClickEvent(event, array){
+                    var choosen = array[0]._index;
+                    var element = document.getElementById("brsAccident");
+
+                    if(element.value == brsCount[choosen].br){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorBrs){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs;
+                            element.value = null;
+                        }
+                    }
+                    
+                    else{
+                        //Create new option for selected BR
+                        var opt = document.createElement('option');
+                        opt.value = brsCount[choosen].br;
+                        opt.innerHTML = brsCount[choosen].br;
+                        element.appendChild(opt);
+                        element.value = brsCount[choosen].br;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorBrs){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundColorBrs = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionBrs = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
+                    this.update();
+                }
         #chartHours
             canvas(id="bar-chart-horizontal")
             script.
@@ -538,6 +618,10 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }]
                     },
                     options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
+                        },
                         onClick: hoursClickEvent,
                     scales: {
                         xAxes: [{
@@ -564,7 +648,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     if(element.value == hoursCount[choosen].hora){ //If user selects a filter and diselects it we take off gray and diselect the filter
                         if(this.previousBackgroundColorHours){
                             this.data.datasets[0].backgroundColor[this.previousBackgroundPositionHours] = this.previousBackgroundColorHours;
-                             element.value = null;
+                            element.value = null;
                         }
                     }
 
@@ -586,302 +670,250 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     }
                     this.update();
                 }
-            #chartBrs
-                canvas(id="polar-chart")
-                script.
-                    var brsAccidents = !{JSON.stringify(brsData)};               
-                    var brsCount = brsAccidents.rows;
-                    if(brsAccidents.rowCount > 1){
-                        var backgroundColorBrs = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
-                        var labelsBrs = ['BR-' + brsCount[0].br, 'BR-' + brsCount[1].br, 'BR-' + brsCount[2].br, 'BR-' + brsCount[3].br, 'BR-' + brsCount[4].br, 'BR-' + brsCount[5].br, 'BR-' + brsCount[6].br, 'BR-' + brsCount[7].br, 'BR-' + brsCount[8].br, 'BR-' + brsCount[9].br];
-                        var dataBrs = [brsCount[0].count, brsCount[1].count, brsCount[2].count, brsCount[3].count, brsCount[4].count, brsCount[5].count, brsCount[6].count, brsCount[7].count, brsCount[8].count, brsCount[9].count];
+        #chartDeaths
+            canvas(id="bar-chart-horizontal-classification")
+            script.
+                var classAccidents = !{JSON.stringify(classData)};             
+                var classCount = classAccidents.rows;
+                var classColor=[];
+                var classLabel=[];
+
+                classAccidents.rows.forEach(function(entry, index) { //We receive class as number, we converte it back here
+                    if(entry.classificacao_acidente == 5){
+                        classLabel.push('Sem Vítimas'); 
+                        classColor.push("#6cc0e5");
+                    }
+                    else if(entry.classificacao_acidente == 3){
+                        classLabel.push('Com Vítimas Feridas'); 
+                        classColor.push("#fbc93d");
+                    }
+                    else if(entry.classificacao_acidente == 1){
+                        classLabel.push('Com Vítimas Fatais'); 
+                        classColor.push("#fb4f4f");
                     }
                     else{
-                        var backgroundColorBrs = ["#9b2948"];
-                        var labelsBrs = ['BR-' + brsCount[0].br];
-                        var dataBrs = [brsCount[0].count];
+                        classLabel.push('Ignorado');
+                        classColor.push("#CCC");
                     }
-                    var chartBrs = new Chart(document.getElementById("polar-chart"), {
-                        type: 'polarArea',
-                        data: {
-                        labels: labelsBrs,
-                        datasets: [
-                            {
-                            label: "Quantidade:",
-                            backgroundColor: backgroundColorBrs, 
-                            data: dataBrs
-                            }
-                        ]
+                });
+
+                if(classAccidents.rowCount > 1){
+                    var backgroundColorClass = classColor;
+                    var dataClass = [classCount[0].count, classCount[1].count, classCount[2].count];
+                }
+                else{
+                    var backgroundColorClass = ["#fbc93d"];
+                    var dataClass = [classCount[0].count];
+                }
+
+                var barchartClass = new Chart(document.getElementById("bar-chart-horizontal-classification"), {
+                    type: 'horizontalBar',
+                    data: {
+                    labels: classLabel,
+                    datasets: [{
+                        label: "Quantidade",
+                        backgroundColor: backgroundColorClass,
+                        data: dataClass
+                    }]
+                    },
+                    options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
                         },
-                        options: {
-                            onClick: brsClickEvent,
-                        title: {
-                            display: true,
-                            text: 'BRs com maior número de acidentes'
-                        }
-                        }
-                    });
-                    function brsClickEvent(event, array){
-                        var choosen = array[0]._index;
-                        var element = document.getElementById("brsAccident");
-
-                        if(element.value == brsCount[choosen].br){ //If user selects a filter and diselects it we take off gray and diselect the filter
-                            if(this.previousBackgroundColorBrs){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs;
-                                element.value = null;
+                        onClick: classClickEvent,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                min: 0 // Edit the value according to what you need
                             }
-                        }
-                        
-                        else{
-                            //Create new option for selected BR
-                            var opt = document.createElement('option');
-                            opt.value = brsCount[choosen].br;
-                            opt.innerHTML = brsCount[choosen].br;
-                            element.appendChild(opt);
-                            element.value = brsCount[choosen].br;
-
-                            var elementIndex = array[0]._index;
-                            if(this.previousBackgroundColorBrs){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionBrs] = this.previousBackgroundColorBrs; //Swap old selected to previous color
-                            }
-                            this.previousBackgroundColorBrs = this.data.datasets[0].backgroundColor[elementIndex];
-                            this.previousBackgroundPositionBrs = elementIndex;
-                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
-                        }
-                        this.update();
-                    }
-            #chartStates
-                canvas(id="bar-chart-states")
-                script.
-                    var statesAccidents = !{JSON.stringify(statesData)};             
-                    var statesCount = statesAccidents.rows;
-                    
-                    if(statesAccidents.rowCount > 1){
-                        var backgroundColorStates = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
-                        var labelsStates = [statesCount[0].uf, statesCount[1].uf, statesCount[2].uf, statesCount[3].uf, statesCount[4].uf, statesCount[5].uf, statesCount[6].uf, statesCount[7].uf, statesCount[8].uf, statesCount[9].uf];
-                        var dataStates = [statesCount[0].count, statesCount[1].count, statesCount[2].count, statesCount[3].count, statesCount[4].count, statesCount[5].count, statesCount[6].count, statesCount[7].count, statesCount[8].count, statesCount[9].count];
-                    }
-                    else{
-                        var backgroundColorStates = ["#9b2948"];
-                        var labelsStates = [statesCount[0].uf];
-                        var dataStates = [statesCount[0].count];
-                    }
-
-                    var bar_chart_states = new Chart(document.getElementById("bar-chart-states"), {
-                        type: 'bar',
-                        data: {
-                        labels: labelsStates,
-                        datasets: [
-                            {
-                            label: "Quantidade de acidentes",
-                            backgroundColor: backgroundColorStates,
-                            data: dataStates
-                            }
-                        ]
-                        },
-                        options: {
-                            legend: { display: false },
-                            title: {
-                                display: true,
-                                text: 'Estados com maior número de acidentes'
-                            },
-                            maintainAspectRatio: false,
-                            onClick: statesClickEvent,
-                            responsive: true,
-                            scales: {
-                                yAxes: [{
-                                    ticks: {
-                                        beginAtZero:true
-                                    }
-                                }]
-                            }
-                        }
-                    });
-
-                    function statesClickEvent(event, array){
-                        var choosen = array[0]._index;
-                        var element = document.getElementById("statesAccident");
-
-                        if(element.value == statesCount[choosen].uf){ //If user selects a filter and diselects it we take off gray and diselect the filter
-                            if(this.previousBackgroundColorStates){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates;
-                                element.value = null;
-                            }
-                        }
-
-                        else{
-                             //Create new option for state
-                            var opt = document.createElement('option');
-                            opt.value = statesCount[choosen].uf;
-                            opt.innerHTML = statesCount[choosen].uf;
-                            element.appendChild(opt);
-                            element.value = statesCount[choosen].uf;
-
-                            var elementIndex = array[0]._index;
-                            if(this.previousBackgroundColorStates){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates; //Swap old selected to previous color
-                            }
-                            this.previousBackgroundColorStates = this.data.datasets[0].backgroundColor[elementIndex];
-                            this.previousBackgroundPositionStates = elementIndex;
-                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
-                        }
-                        this.update();
-                    }
-            #chartTypes
-                canvas(id="doughnut-chart")
-                script.
-                    var typesAccidents = !{JSON.stringify(typesData)};             
-                    var typesCount = typesAccidents.rows;
-                    
-                    if(typesAccidents.rowCount > 1){
-                        var backgroundColorTypes = ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"];
-                        var labelsTypes = [typesCount[0].tipo_acidente, typesCount[1].tipo_acidente, typesCount[2].tipo_acidente, typesCount[3].tipo_acidente, typesCount[4].tipo_acidente];
-                        var dataStates = [typesCount[0].count, typesCount[1].count, typesCount[2].count, typesCount[3].count, typesCount[4].count];
-                    }
-                    else{
-                        var backgroundColorTypes = ["#9b2948"];
-                        var labelsTypes = [typesCount[0].tipo_acidente];
-                        var dataStates = [typesCount[0].count];
-                    }
-
-                    var typesChart = new Chart(document.getElementById("doughnut-chart"), {
-                        type: 'doughnut',
-                        data: {
-                        labels: labelsTypes,
-                        datasets: [
-                            {
-                            label: "Quantidade",
-                            backgroundColor: backgroundColorTypes,
-                            data: dataStates
-                            }
-                        ]
-                        },
-                        options: {
-                            onClick: typesClickEvent,
-                        title: {
-                            display: true,
-                            text: 'Tipos de acidente mais comuns'
-                        }
-                        }
-                    });
-
-                    function typesClickEvent(event, array){
-                        var choosen = array[0]._index;
-                        var element = document.getElementById("typesAccident");
-
-                        if(element.value == typesCount[choosen].tipo_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
-                            if(this.previousbackgroundColorTypes){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionTypes] = this.previousbackgroundColorTypes;
-                                element.value = null;
-                            }
-                        }
-
-                        else{
-                             //Create new option for state
-                            var opt = document.createElement('option');
-                            opt.value = typesCount[choosen].tipo_acidente;
-                            opt.innerHTML = typesCount[choosen].tipo_acidente;
-                            element.appendChild(opt);
-                            element.value = typesCount[choosen].tipo_acidente;
-
-                            var elementIndex = array[0]._index;
-                            if(this.previousbackgroundColorTypes){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionTypes] = this.previousbackgroundColorTypes; //Swap old selected to previous color
-                            }
-                            this.previousbackgroundColorTypes = this.data.datasets[0].backgroundColor[elementIndex];
-                            this.previousBackgroundPositionTypes = elementIndex;
-                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
-                        }
-                        this.update();
-                    }
-            #chartDeaths
-                canvas(id="bar-chart-horizontal-classification")
-                script.
-                    var classAccidents = !{JSON.stringify(classData)};             
-                    var classCount = classAccidents.rows;
-                    var classColor=[];
-                    var classLabel=[];
-
-                    classAccidents.rows.forEach(function(entry, index) { //We receive class as number, we converte it back here
-                        if(entry.classificacao_acidente == 5){
-                            classLabel.push('Sem Vítimas'); 
-                            classColor.push("#6cc0e5");
-                        }
-                        else if(entry.classificacao_acidente == 3){
-                            classLabel.push('Com Vítimas Feridas'); 
-                            classColor.push("#fbc93d");
-                        }
-                        else if(entry.classificacao_acidente == 1){
-                            classLabel.push('Com Vítimas Fatais'); 
-                            classColor.push("#fb4f4f");
-                        }
-                        else{
-                            classLabel.push('Ignorado');
-                            classColor.push("#CCC");
-                        }
-                    });
-
-                    if(classAccidents.rowCount > 1){
-                        var backgroundColorClass = classColor;
-                        var dataClass = [classCount[0].count, classCount[1].count, classCount[2].count];
-                    }
-                    else{
-                        var backgroundColorClass = ["#fbc93d"];
-                        var dataClass = [classCount[0].count];
-                    }
-
-                    var barchartClass = new Chart(document.getElementById("bar-chart-horizontal-classification"), {
-                        type: 'horizontalBar',
-                        data: {
-                        labels: classLabel,
-                        datasets: [{
-                            label: "Quantidade",
-                            backgroundColor: backgroundColorClass,
-                            data: dataClass
+                        }],
+                        yAxes: [{
+                            stacked: true
                         }]
-                        },
-                        options: {
-                            onClick: classClickEvent,
-                        scales: {
-                            xAxes: [{
-                                ticks: {
-                                    min: 0 // Edit the value according to what you need
-                                }
-                            }],
-                            yAxes: [{
-                                stacked: true
-                            }]
+                    },
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Classificação dos Acidentes'
+                    }
+                    }
+                });
+                function classClickEvent(event, array){
+                    var choosen = array[0]._index;
+                    var element = document.getElementById("classAccident");
+
+                    if(element.value == classCount[choosen].classificacao_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorClass){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionClass] = this.previousBackgroundColorClass;
+                            element.value = null;
+                        }
+                    }
+
+                    else{
+                        element.value = classCount[choosen].classificacao_acidente;
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorClass){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionClass] = this.previousBackgroundColorClass; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundColorClass = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionClass = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
+                    this.update();
+                }
+        #chartStates
+            canvas(id="bar-chart-states")
+            script.
+                var statesAccidents = !{JSON.stringify(statesData)};             
+                var statesCount = statesAccidents.rows;
+                
+                if(statesAccidents.rowCount > 1){
+                    var backgroundColorStates = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
+                    var labelsStates = [statesCount[0].uf, statesCount[1].uf, statesCount[2].uf, statesCount[3].uf, statesCount[4].uf, statesCount[5].uf, statesCount[6].uf, statesCount[7].uf, statesCount[8].uf, statesCount[9].uf];
+                    var dataStates = [statesCount[0].count, statesCount[1].count, statesCount[2].count, statesCount[3].count, statesCount[4].count, statesCount[5].count, statesCount[6].count, statesCount[7].count, statesCount[8].count, statesCount[9].count];
+                }
+                else{
+                    var backgroundColorStates = ["#9b2948"];
+                    var labelsStates = [statesCount[0].uf];
+                    var dataStates = [statesCount[0].count];
+                }
+
+                var bar_chart_states = new Chart(document.getElementById("bar-chart-states"), {
+                    type: 'bar',
+                    data: {
+                    labels: labelsStates,
+                    datasets: [
+                        {
+                        label: "Quantidade de acidentes",
+                        backgroundColor: backgroundColorStates,
+                        data: dataStates
+                        }
+                    ]
+                    },
+                    options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
                         },
                         legend: { display: false },
                         title: {
                             display: true,
-                            text: 'Classificação dos Acidentes'
+                            text: 'Estados com maior número de acidentes'
+                        },
+                        maintainAspectRatio: false,
+                        onClick: statesClickEvent,
+                        responsive: true,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
                         }
-                        }
-                    });
-                    function classClickEvent(event, array){
-                        var choosen = array[0]._index;
-                        var element = document.getElementById("classAccident");
-
-                        if(element.value == classCount[choosen].classificacao_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
-                            if(this.previousBackgroundColorClass){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionClass] = this.previousBackgroundColorClass;
-                                element.value = null;
-                            }
-                        }
-
-                        else{
-                            element.value = classCount[choosen].classificacao_acidente;
-                            var elementIndex = array[0]._index;
-                            if(this.previousBackgroundColorClass){
-                                this.data.datasets[0].backgroundColor[this.previousBackgroundPositionClass] = this.previousBackgroundColorClass; //Swap old selected to previous color
-                            }
-                            this.previousBackgroundColorClass = this.data.datasets[0].backgroundColor[elementIndex];
-                            this.previousBackgroundPositionClass = elementIndex;
-                            this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
-                        }
-                        this.update();
                     }
+                });
+
+                function statesClickEvent(event, array){
+                    var choosen = array[0]._index;
+                    var element = document.getElementById("statesAccident");
+
+                    if(element.value == statesCount[choosen].uf){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousBackgroundColorStates){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates;
+                            element.value = null;
+                        }
+                    }
+
+                    else{
+                            //Create new option for state
+                        var opt = document.createElement('option');
+                        opt.value = statesCount[choosen].uf;
+                        opt.innerHTML = statesCount[choosen].uf;
+                        element.appendChild(opt);
+                        element.value = statesCount[choosen].uf;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousBackgroundColorStates){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionStates] = this.previousBackgroundColorStates; //Swap old selected to previous color
+                        }
+                        this.previousBackgroundColorStates = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionStates = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
+                    this.update();
+                }
+        #chartTypes
+            canvas(id="doughnut-chart")
+            script.
+                var typesAccidents = !{JSON.stringify(typesData)};             
+                var typesCount = typesAccidents.rows;
+                
+                if(typesAccidents.rowCount > 1){
+                    var backgroundColorTypes = ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"];
+                    var labelsTypes = [typesCount[0].tipo_acidente, typesCount[1].tipo_acidente, typesCount[2].tipo_acidente, typesCount[3].tipo_acidente, typesCount[4].tipo_acidente];
+                    var dataStates = [typesCount[0].count, typesCount[1].count, typesCount[2].count, typesCount[3].count, typesCount[4].count];
+                }
+                else{
+                    var backgroundColorTypes = ["#9b2948"];
+                    var labelsTypes = [typesCount[0].tipo_acidente];
+                    var dataStates = [typesCount[0].count];
+                }
+
+                var typesChart = new Chart(document.getElementById("doughnut-chart"), {
+                    type: 'doughnut',
+                    data: {
+                    labels: labelsTypes,
+                    datasets: [
+                        {
+                        label: "Quantidade",
+                        backgroundColor: backgroundColorTypes,
+                        data: dataStates
+                        }
+                    ]
+                    },
+                    options: {
+                        tooltips: { 
+                            bodyFontSize: 18,
+                            titleFontSize: 18
+                        },
+                        onClick: typesClickEvent,
+                    title: {
+                        display: true,
+                        text: 'Tipos de acidente mais comuns'
+                    }
+                    }
+                });
+
+                function typesClickEvent(event, array){
+                    var choosen = array[0]._index;
+                    var element = document.getElementById("typesAccident");
+
+                    if(element.value == typesCount[choosen].tipo_acidente){ //If user selects a filter and diselects it we take off gray and diselect the filter
+                        if(this.previousbackgroundColorTypes){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionTypes] = this.previousbackgroundColorTypes;
+                            element.value = null;
+                        }
+                    }
+
+                    else{
+                            //Create new option for state
+                        var opt = document.createElement('option');
+                        opt.value = typesCount[choosen].tipo_acidente;
+                        opt.innerHTML = typesCount[choosen].tipo_acidente;
+                        element.appendChild(opt);
+                        element.value = typesCount[choosen].tipo_acidente;
+
+                        var elementIndex = array[0]._index;
+                        if(this.previousbackgroundColorTypes){
+                            this.data.datasets[0].backgroundColor[this.previousBackgroundPositionTypes] = this.previousbackgroundColorTypes; //Swap old selected to previous color
+                        }
+                        this.previousbackgroundColorTypes = this.data.datasets[0].backgroundColor[elementIndex];
+                        this.previousBackgroundPositionTypes = elementIndex;
+                        this.data.datasets[0].backgroundColor[elementIndex] = 'gray';
+                    }
+                    this.update();
+                }
         
 
                 
