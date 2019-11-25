@@ -285,7 +285,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
             option(disabled='', selected='', value='') States
         select(name='typesAccident' id='typesAccident' hidden)
             option(disabled='', selected='', value='') Types
-        input(type='button', class="goBackButton", value='Voltar', onclick="window.location='http://localhost:3001/map';")
+        input(type='button', class="goBackButton", value='Limpar', onclick="window.location='http://localhost:3001/map';")
         input(type='submit', class="submitButton" value='Filtrar')
     #charts 
         #chartWeekDay
@@ -347,6 +347,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         },
                         legend: { display: false },
                         title: {
+                            fontSize: 15,
                             display: true,
                             text: 'Número de acidentes por dia da semana'
                         },
@@ -421,6 +422,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         },
                         legend: { display: false },
                         title: {
+                            fontSize: 15,
                             display: true,
                             text: 'Acidentes por ano'
                         },
@@ -489,6 +491,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         },
                         onClick: causesClickEvent,
                     title: {
+                        fontSize: 15,
                         display: true,
                         text: 'Principais causas dos acidentes'
                     }
@@ -557,6 +560,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         },
                         onClick: brsClickEvent,
                     title: {
+                        fontSize: 15,
                         display: true,
                         text: 'BRs com maior número de acidentes'
                     }
@@ -635,6 +639,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     },
                     legend: { display: false },
                     title: {
+                        fontSize: 15,
                         display: true,
                         text: 'Principais horários dos acidentes'
                     }
@@ -734,6 +739,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                     },
                     legend: { display: false },
                     title: {
+                        fontSize: 15,
                         display: true,
                         text: 'Classificação dos Acidentes'
                     }
@@ -769,7 +775,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                 var statesCount = statesAccidents.rows;
                 
                 if(statesAccidents.rowCount > 1){
-                    var backgroundColorStates = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "#f4f2c9"];//https://www.color-hex.com/color-palette/1499 Palette Brs
+                    var backgroundColorStates = ["#c93333", "#60b059","#f2d26e","#98c0df","#e7a7b1", "#c78ce1", "#a86210", "#ff8000", "#a4acb4", "purple"];//https://www.color-hex.com/color-palette/1499 Palette Brs
                     var labelsStates = [statesCount[0].uf, statesCount[1].uf, statesCount[2].uf, statesCount[3].uf, statesCount[4].uf, statesCount[5].uf, statesCount[6].uf, statesCount[7].uf, statesCount[8].uf, statesCount[9].uf];
                     var dataStates = [statesCount[0].count, statesCount[1].count, statesCount[2].count, statesCount[3].count, statesCount[4].count, statesCount[5].count, statesCount[6].count, statesCount[7].count, statesCount[8].count, statesCount[9].count];
                 }
@@ -798,6 +804,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         },
                         legend: { display: false },
                         title: {
+                            fontSize: 15,
                             display: true,
                             text: 'Estados com maior número de acidentes'
                         },
@@ -879,6 +886,7 @@ script(src='http://d3js.org/d3.v3.min.js', charset='utf-8')
                         },
                         onClick: typesClickEvent,
                     title: {
+                        fontSize: 15,
                         display: true,
                         text: 'Tipos de acidente mais comuns'
                     }
